@@ -47,6 +47,7 @@ class Expense {
   double amount;
   String date;
   String type;
+  String paymentMethod;
 
   Expense({
     this.id,
@@ -54,6 +55,7 @@ class Expense {
     required this.amount,
     required this.date,
     required this.type,
+    required this.paymentMethod,
   });
 
   Expense copyWith({
@@ -62,6 +64,7 @@ class Expense {
     double? amount,
     String? date,
     String? type,
+    String? paymentMethod,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -69,6 +72,7 @@ class Expense {
       amount: amount ?? this.amount,
       date: date ?? this.date,
       type: type ?? this.type,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
     );
   }
 
@@ -79,6 +83,7 @@ class Expense {
       'amount': amount,
       'date': date,
       'type': type,
+      'paymentMethod': paymentMethod,
     };
   }
 
@@ -89,6 +94,7 @@ class Expense {
       amount: map['amount'].toDouble(), // Ensure correct type conversion
       date: map['date'],
       type: map['type'],
+      paymentMethod: map['paymentMethod'],
     );
   }
 }

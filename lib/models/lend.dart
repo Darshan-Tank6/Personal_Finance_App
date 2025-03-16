@@ -6,6 +6,7 @@ class Lending {
   String status;
   String date;
   String clearedDate;
+  String paymentMethod;
 
   Lending({
     this.id,
@@ -14,6 +15,7 @@ class Lending {
     required this.status,
     required this.date,
     required this.clearedDate,
+    required this.paymentMethod,
   });
 
   Map<String, dynamic> toMap() {
@@ -24,6 +26,19 @@ class Lending {
       'status': status,
       'date': date,
       'clearedDate': clearedDate,
+      'paymentMethod': paymentMethod,
     };
+  }
+
+  factory Lending.fromMap(Map<String, dynamic> map) {
+    return Lending(
+      id: map['id'],
+      name: map['name'],
+      amount: map['amount'],
+      status: map['status'],
+      date: map['date'],
+      clearedDate: map['clearedDate'],
+      paymentMethod: map['paymentMethod'],
+    );
   }
 }

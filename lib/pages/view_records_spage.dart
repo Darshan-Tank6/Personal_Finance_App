@@ -19,206 +19,8 @@
 //   late TabController _tabController;
 //   final _dbHelper = DatabaseHelper();
 //   late String _currentMonthYear;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _tabController = TabController(length: 4, vsync: this);
-//     _currentMonthYear = DateFormat('yyyy-MM').format(DateTime.now());
-//   }
-
-//   @override
-//   void dispose() {
-//     _tabController.dispose();
-//     super.dispose();
-//   }
-
-//   Future<List<dynamic>> _fetchRecords(String type) {
-//     final recordFetchers = {
-//       'Income':
-//           () => _dbHelper.getRecordsByMonthYear(
-//             _currentMonthYear,
-//             'incomes',
-//             (map) => Income(
-//               id: map['id'],
-//               source: map['source'],
-//               amount: map['amount'],
-//               date: map['date'],
-//             ),
-//           ),
-//       'Expense':
-//           () => _dbHelper.getRecordsByMonthYear(
-//             _currentMonthYear,
-//             'expenses',
-//             (map) => Expense(
-//               id: map['id'],
-//               name: map['name'],
-//               amount: map['amount'],
-//               date: map['date'],
-//             ),
-//           ),
-//       'Borrow':
-//           () => _dbHelper.getRecordsByMonthYear(
-//             _currentMonthYear,
-//             'borrows',
-//             (map) => Borrow(
-//               id: map['id'],
-//               name: map['name'],
-//               amount: map['amount'],
-//               clearedDate: map['clearedDate'],
-//               date: map['date'],
-//             ),
-//           ),
-//       'Lending':
-//           () => _dbHelper.getRecordsByMonthYear(
-//             _currentMonthYear,
-//             'lendings',
-//             (map) => Lending(
-//               id: map['id'],
-//               name: map['name'],
-//               amount: map['amount'],
-//               date: map['date'],
-//               clearedDate: map['clearedDate'],
-//             ),
-//           ),
-//     };
-
-//     return recordFetchers[type]!();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(
-//           'Records for ${DateFormat("MMMM yyyy").format(DateTime.now())}',
-//         ),
-//         bottom: TabBar(
-//           labelColor: Colors.purpleAccent[100],
-//           indicatorColor: Colors.purpleAccent[100],
-//           controller: _tabController,
-//           tabs: const [
-//             Tab(text: 'Income'),
-//             Tab(text: 'Expense'),
-//             Tab(text: 'Lending'),
-//             Tab(text: 'Borrow'),
-//           ],
-//         ),
-//       ),
-//       body: TabBarView(
-//         controller: _tabController,
-//         children: [
-//           _buildRecordList('Income'),
-//           _buildRecordList('Expense'),
-//           _buildRecordList('Lending'),
-//           _buildRecordList('Borrow'),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildRecordList(String type) {
-//     return FutureBuilder<List<dynamic>>(
-//       future: _fetchRecords(type),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const Center(child: CircularProgressIndicator());
-//         } else if (snapshot.hasError) {
-//           return Center(child: Text('Error: ${snapshot.error}'));
-//         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-//           return Center(child: Text('No $type records found.'));
-//         }
-
-//         final records = snapshot.data!;
-//         return ListView.builder(
-//           itemCount: records.length,
-//           itemBuilder: (context, index) {
-//             final record = records[index];
-//             final recordId = record.id;
-//             final isSelected = _selectedRecords.contains(recordId);
-//             if (record is Expense) {
-//               return ListTile(
-//                 title: Text(record.name),
-//                 subtitle: Text('Amount: ${record.amount}'),
-//                 trailing: Text(record.date),
-//               );
-//             } else if (record is Income) {
-//               return ListTile(
-//                 title: Text("${record.source}"),
-//                 subtitle: Text(
-//                   'Amount: ${record.amount}',
-//                   style: TextStyle(color: Colors.green),
-//                 ),
-//                 //trailing: Text(record.date),
-//                 trailing: IconButton(
-//                   icon: Icon(Icons.delete),
-//                   onPressed: () => _deleteIncome(record.id!),
-//                   iconSize: 18,
-//                   tooltip: 'Delete Income',
-//                   padding: EdgeInsets.zero,
-//                   constraints: BoxConstraints(),
-//                 ),
-//               );
-//             } else if (record is Borrow) {
-//               return ListTile(
-//                 title: Text(record.name),
-//                 subtitle: Text('Amount: ${record.amount}'),
-//                 trailing: Text(record.date),
-//               );
-//             } else if (record is Lending) {
-//               return ListTile(
-//                 title: Text(record.name),
-//                 subtitle: Text('Amount: ${record.amount}'),
-//                 trailing: Text(record.date),
-//               );
-//             } else {
-//               return const SizedBox.shrink();
-//             }
-//           },
-//         );
-//       },
-//     );
-//   }
-
-//   //delete income
-//   void _deleteIncome(int id) async {
-//     await _dbHelper.deleteIncome(id);
-//     setState(() {});
-//   }
-// }
-
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-// import '../helpers/database_helper.dart';
-// import '../models/borrow.dart';
-// import '../models/expense.dart';
-// import '../models/income.dart';
-// import '../models/lend.dart';
-
-// class CurrentMonthRecordsScreen extends StatefulWidget {
-//   const CurrentMonthRecordsScreen({Key? key}) : super(key: key);
-
-//   @override
-//   _CurrentMonthRecordsScreenState createState() =>
-//       _CurrentMonthRecordsScreenState();
-// }
-
-// class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
-//     with SingleTickerProviderStateMixin {
-//   late TabController _tabController;
-//   final _dbHelper = DatabaseHelper();
-//   late String _currentMonthYear;
 //   final Set<int> _selectedRecords = {};
 
-//   final _nameController = TextEditingController();
-//   final _amountController = TextEditingController();
-//   final _statusController = TextEditingController();
-
-//   DateTime _selectedDate = DateTime.now();
-//   String dateselected = DateFormat('yyyy-MM-dd').format(DateTime.now());
-//   String monthYear = DateFormat('yyyy-MM').format(DateTime.now());
-//   DateFormat formatter = DateFormat('yyyy-MM-dd');
-
 //   @override
 //   void initState() {
 //     super.initState();
@@ -233,6 +35,36 @@
 //   }
 
 //   Future<List<dynamic>> _fetchRecords(String type) {
+//     //   final recordFetchers = {
+//     //     'Income':
+//     //         () => _dbHelper.getRecordsByMonthYear(
+//     //           _currentMonthYear,
+//     //           'incomes',
+//     //           (map) => Income.fromMap(map),
+//     //         ),
+//     //     'Expense':
+//     //         () => _dbHelper.getRecordsByMonthYear(
+//     //           _currentMonthYear,
+//     //           'expenses',
+//     //           (map) => Expense.fromMap(map),
+//     //         ),
+//     //     'Borrow':
+//     //         () => _dbHelper.getRecordsByMonthYear(
+//     //           _currentMonthYear,
+//     //           'borrows',
+//     //           (map) => Borrow.fromMap(map),
+//     //         ),
+//     //     'Lending':
+//     //         () => _dbHelper.getRecordsByMonthYear(
+//     //           _currentMonthYear,
+//     //           'lendings',
+//     //           (map) => Lending.fromMap(map),
+//     //         ),
+//     //   };
+
+//     //   return recordFetchers[type]!();
+//     // }
+
 //     final recordFetchers = {
 //       'Income':
 //           () => _dbHelper.getRecordsByMonthYear(
@@ -254,6 +86,7 @@
 //               name: map['name'],
 //               amount: map['amount'],
 //               date: map['date'],
+//               type: map['type'],
 //             ),
 //           ),
 //       'Borrow':
@@ -287,186 +120,12 @@
 //     return recordFetchers[type]!();
 //   }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     final theme = Theme.of(context);
-//     final isDarkMode = theme.brightness == Brightness.dark;
-
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text(
-//           'Records for ${DateFormat("MMMM yyyy").format(DateTime.now())}',
-//         ),
-//         actions:
-//             _selectedRecords.isNotEmpty
-//                 ? [
-//                   IconButton(
-//                     icon: const Icon(Icons.delete),
-//                     onPressed: _deleteSelectedRecords,
-//                   ),
-//                 ]
-//                 : null,
-//         bottom: TabBar(
-//           labelColor: theme.colorScheme.secondary,
-//           indicatorColor: theme.colorScheme.secondary,
-//           controller: _tabController,
-//           tabs: const [
-//             Tab(text: 'Income'),
-//             Tab(text: 'Expense'),
-//             Tab(text: 'Lending'),
-//             Tab(text: 'Borrow'),
-//           ],
-//         ),
-//       ),
-//       body: TabBarView(
-//         controller: _tabController,
-//         children: [
-//           _buildRecordList('Income', isDarkMode),
-//           _buildRecordList('Expense', isDarkMode),
-//           _buildRecordList('Lending', isDarkMode),
-//           _buildRecordList('Borrow', isDarkMode),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _buildRecordList(String type, bool isDarkMode) {
-//     return FutureBuilder<List<dynamic>>(
-//       future: _fetchRecords(type),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const Center(child: CircularProgressIndicator());
-//         } else if (snapshot.hasError) {
-//           return Center(child: Text('Error: ${snapshot.error}'));
-//         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-//           return Center(
-//             child: Text(
-//               'No $type records found.',
-//               style: TextStyle(fontSize: 16, color: Colors.grey),
-//             ),
-//           );
-//         }
-
-//         final records = snapshot.data!;
-//         return ListView.separated(
-//           itemCount: records.length,
-//           separatorBuilder: (context, index) => const Divider(height: 1),
-//           itemBuilder: (context, index) {
-//             final record = records[index];
-//             final recordId = record.id;
-//             final isSelected = _selectedRecords.contains(recordId);
-//             final selectionColor = Theme.of(
-//               context,
-//             ).colorScheme.secondary.withOpacity(0.3);
-
-//             return GestureDetector(
-//               onLongPress: () => _toggleSelection(recordId),
-//               onTap: () {
-//                 if (_selectedRecords.isNotEmpty) {
-//                   _toggleSelection(recordId);
-//                 }
-//               },
-//               child: AnimatedContainer(
-//                 duration: const Duration(milliseconds: 300),
-//                 curve: Curves.easeInOut,
-//                 decoration: BoxDecoration(
-//                   color: isSelected ? selectionColor : null,
-//                   border:
-//                       isSelected
-//                           ? Border.all(
-//                             color: Theme.of(context).colorScheme.secondary,
-//                             width: 2,
-//                           )
-//                           : null,
-//                 ),
-//                 child: ListTile(
-//                   contentPadding: const EdgeInsets.symmetric(
-//                     horizontal: 16,
-//                     vertical: 8,
-//                   ),
-//                   title: Text(
-//                     record is Income ? record.source : record.name,
-//                     style: TextStyle(fontWeight: FontWeight.w500),
-//                   ),
-//                   // subtitle: Text(
-//                   //   (record != Borrow || record != Lending)
-//                   //       ? 'Amount: ${record.amount} | ${record.status} '
-//                   //       : 'Amount: ${record.amount}',
-//                   //   style: TextStyle(color: Colors.grey[600]),
-//                   // ),
-//                   subtitle: RichText(
-//                     text: TextSpan(
-//                       style: TextStyle(
-//                         color: Colors.grey[600],
-//                         fontSize: 14,
-//                       ), // Default style
-//                       children: [
-//                         TextSpan(
-//                           text:
-//                               (record is Borrow || record is Lending)
-//                                   ? '₹ ${record.amount} | '
-//                                   : '₹ ${record.amount}',
-//                         ),
-//                         if (record is Borrow || record is Lending) ...[
-//                           if (record.status == "Pending")
-//                             TextSpan(
-//                               text: record.status,
-//                               style: TextStyle(
-//                                 color: Colors.red[200],
-//                               ), // Red status
-//                             ),
-//                           if (record.status != 'Pending')
-//                             TextSpan(
-//                               text: 'Cleared: ${record.clearedDate}',
-//                               style: TextStyle(color: Colors.grey[600]),
-//                             ),
-//                         ],
-//                       ],
-//                     ),
-//                   ),
-
-//                   trailing:
-//                       _selectedRecords.isEmpty
-//                           ? Row(
-//                             mainAxisSize: MainAxisSize.min,
-//                             children: [
-//                               if (record is Income)
-//                                 IconButton(
-//                                   icon: const Icon(Icons.delete, size: 20),
-//                                   onPressed:
-//                                       () => _deleteRecord(type, record.id!),
-//                                   //onPressed: () => _deleteIncome(record.id!),
-//                                   padding: EdgeInsets.zero,
-//                                   constraints: const BoxConstraints(),
-//                                 ),
-//                               IconButton(
-//                                 icon: const Icon(Icons.edit, size: 20),
-//                                 onPressed:
-//                                     () => _editRecord(context, type, record),
-//                                 padding: EdgeInsets.zero,
-//                                 constraints: const BoxConstraints(),
-//                               ),
-//                             ],
-//                           )
-//                           : null,
-//                 ),
-//               ),
-//             );
-//           },
-//         );
-//       },
-//     );
-//   }
-
-//   void _toggleSelection(int id) {
-//     setState(() {
-//       if (_selectedRecords.contains(id)) {
-//         _selectedRecords.remove(id);
-//       } else {
-//         _selectedRecords.add(id);
-//       }
-//     });
-//   }
+//   // void _deleteSelectedRecords() async {
+//   //   for (var id in _selectedRecords) {
+//   //     await _dbHelper.deleteRecordById(id);
+//   //   }
+//   //   setState(() => _selectedRecords.clear());
+//   // }
 
 //   void _deleteSelectedRecords() async {
 //     for (var id in _selectedRecords) {
@@ -487,32 +146,30 @@
 //       }
 //     }
 //     setState(() {
-//       _selectedRecords.clear;
+//       _selectedRecords.clear();
 //     });
 //   }
 
-//   void _deleteRecord(String type, int id) async {
-//     switch (type) {
-//       case "Income":
-//         await _dbHelper.deleteIncome(id);
-//         break;
-//       case "Expense":
-//         await _dbHelper.deleteExpense(id);
-//         break;
-//       case "Lending":
-//         await _dbHelper.deleteCredit(id);
-//         break;
-//       case "Borrow":
-//         await _dbHelper.deleteLending(id);
-//         break;
-//       default:
-//         print("Inavlid choice");
-
-//         setState(() {});
-//     }
-//     await _dbHelper.deleteCredit(id);
-//     setState(() {});
+//   void _toggleSelection(int id) {
+//     setState(
+//       () =>
+//           _selectedRecords.contains(id)
+//               ? _selectedRecords.remove(id)
+//               : _selectedRecords.add(id),
+//     );
 //   }
+
+//   final _nameController = TextEditingController();
+//   final _amountController = TextEditingController();
+//   final _statusController = TextEditingController();
+
+//   DateTime _selectedDate = DateTime.now();
+//   String dateselected = DateFormat('yyyy-MM-dd').format(DateTime.now());
+//   String monthYear = DateFormat('yyyy-MM').format(DateTime.now());
+//   DateFormat formatter = DateFormat('yyyy-MM-dd');
+
+//   List<String> _expenseTypes = ["Food", "Transport", "Shopping", "Rent"];
+//   String? _selectedType;
 
 //   void _editRecord(BuildContext context, String type, dynamic record) {
 //     _showTransactionDialog(context, type, transaction: record);
@@ -532,6 +189,42 @@
 //       });
 //     }
 //     print(_selectedDate);
+//   }
+
+//   void _showAddExpenseDialog(BuildContext context) {
+//     TextEditingController _expensetypecontroller = TextEditingController();
+
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: Text("Add Expense Type"),
+//           content: TextField(
+//             controller: _expensetypecontroller,
+//             decoration: InputDecoration(hintText: "Enter new expense type"),
+//           ),
+//           actions: [
+//             TextButton(
+//               onPressed: () => Navigator.of(context).pop(),
+//               child: Text("Cancel"),
+//             ),
+//             TextButton(
+//               onPressed: () {
+//                 setState(() {
+//                   String newType = _expensetypecontroller.text.trim();
+//                   if (newType.isNotEmpty && !_expenseTypes.contains(newType)) {
+//                     _expenseTypes.add(newType);
+//                     _selectedType = newType;
+//                   }
+//                 });
+//                 Navigator.of(context).pop();
+//               },
+//               child: Text("Add"),
+//             ),
+//           ],
+//         );
+//       },
+//     );
 //   }
 
 //   void _showTransactionDialog(
@@ -590,29 +283,81 @@
 //         ];
 
 //         List<Widget> _getInputFields() {
-//           if (type == 'Borrow') {
+//           if (type == 'Borrow' || type == 'Lend') {
 //             return [
 //               ..._getCommonFields(),
-//               DropdownButtonFormField(
-//                 decoration: const InputDecoration(labelText: 'Status'),
-//                 value:
-//                     _statusController.text.isNotEmpty
-//                         ? _statusController.text
-//                         : 'Pending',
-//                 items:
-//                     ['Pending', 'Paid']
-//                         .map(
-//                           (status) => DropdownMenuItem(
-//                             value: status,
-//                             child: Text(status),
-//                           ),
-//                         )
-//                         .toList(),
-//                 onChanged: (value) {
-//                   if (value != null) {
-//                     _statusController.text = value; // Store the selected value
-//                   }
-//                 },
+//               Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   const Text('Status', style: TextStyle(fontSize: 16)),
+//                   const SizedBox(height: 8),
+//                   Row(
+//                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                     children: [
+//                       ElevatedButton(
+//                         onPressed: () {
+//                           _statusController.text = 'Pending';
+//                         },
+//                         style: ElevatedButton.styleFrom(
+//                           backgroundColor:
+//                               _statusController.text == 'Pending'
+//                                   ? Colors
+//                                       .blue // Highlight if selected
+//                                   : Colors.grey[300],
+//                           foregroundColor:
+//                               _statusController.text == 'Pending'
+//                                   ? Colors.white
+//                                   : Colors.black,
+//                         ),
+//                         child: const Text('Pending'),
+//                       ),
+//                       ElevatedButton(
+//                         onPressed: () {
+//                           _statusController.text = 'Paid';
+//                         },
+//                         style: ElevatedButton.styleFrom(
+//                           backgroundColor:
+//                               _statusController.text == 'Paid'
+//                                   ? Colors
+//                                       .blue // Highlight if selected
+//                                   : Colors.grey[300],
+//                           foregroundColor:
+//                               _statusController.text == 'Paid'
+//                                   ? Colors.white
+//                                   : Colors.black,
+//                         ),
+//                         child: const Text('Paid'),
+//                       ),
+//                     ],
+//                   ),
+//                 ],
+//               ),
+//             ];
+//           }
+//           if (type == "Expense") {
+//             return [
+//               ..._getCommonFields(),
+//               Center(
+//                 child: Wrap(
+//                   spacing: 10.0,
+//                   children: [
+//                     ..._expenseTypes.map((type) {
+//                       return ChoiceChip(
+//                         label: Text(type),
+//                         selected: _selectedType == type,
+//                         onSelected: (selected) {
+//                           setState(() {
+//                             _selectedType = type; // Always selects a type
+//                           });
+//                         },
+//                       );
+//                     }).toList(),
+//                     ActionChip(
+//                       label: Text("➕ Add"),
+//                       onPressed: () => _showAddExpenseDialog(context),
+//                     ),
+//                   ],
+//                 ),
 //               ),
 //             ];
 //           }
@@ -624,6 +369,7 @@
 //           final amount = double.parse(_amountController.text);
 //           final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
 //           final status = _statusController.text;
+//           final expenseType = _selectedType ?? '';
 
 //           if (transaction == null) {
 //             // Add new transaction
@@ -635,7 +381,12 @@
 //                 break;
 //               case 'Expense':
 //                 await _dbHelper.insertExpense(
-//                   Expense(name: name, amount: amount, date: formattedDate),
+//                   Expense(
+//                     name: name,
+//                     amount: amount,
+//                     date: formattedDate,
+//                     type: expenseType,
+//                   ),
 //                 );
 //                 break;
 //               case 'Lend':
@@ -684,6 +435,7 @@
 //                     name: name,
 //                     amount: amount,
 //                     date: formattedDate,
+//                     type: expenseType,
 //                   ),
 //                 );
 //                 break;
@@ -745,6 +497,139 @@
 //       },
 //     );
 //   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text(
+//           'Records for ${DateFormat("MMMM yyyy").format(DateTime.now())}',
+//         ),
+
+//         actions:
+//             _selectedRecords.isNotEmpty
+//                 ? [
+//                   IconButton(
+//                     icon: const Icon(Icons.delete),
+//                     onPressed: _deleteSelectedRecords,
+//                   ),
+//                 ]
+//                 : null,
+//         bottom: TabBar(
+//           controller: _tabController,
+//           tabs: const [
+//             Tab(text: 'Income'),
+//             Tab(text: 'Expense'),
+//             Tab(text: 'Lending'),
+//             Tab(text: 'Borrow'),
+//           ],
+//         ),
+//       ),
+//       body: TabBarView(
+//         controller: _tabController,
+//         children:
+//             [
+//               'Income',
+//               'Expense',
+//               'Lending',
+//               'Borrow',
+//             ].map((type) => _buildRecordList(type)).toList(),
+//       ),
+//     );
+//   }
+
+//   Widget _buildRecordList(String type) {
+//     return FutureBuilder<List<dynamic>>(
+//       future: _fetchRecords(type),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const Center(child: CircularProgressIndicator());
+//         } else if (snapshot.hasError) {
+//           return Center(child: Text('Error: ${snapshot.error}'));
+//         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+//           return Center(child: Text('No $type records found.'));
+//         }
+
+//         return ListView.builder(
+//           itemCount: snapshot.data!.length,
+//           itemBuilder: (context, index) {
+//             final record = snapshot.data![index];
+//             final isSelected = _selectedRecords.contains(record.id);
+
+//             return GestureDetector(
+//               onLongPress: () => _toggleSelection(record.id),
+//               onTap:
+//                   () =>
+//                       _selectedRecords.isNotEmpty
+//                           ? _toggleSelection(record.id)
+//                           : null,
+//               child: Card(
+//                 color: isSelected ? Colors.blueAccent.withOpacity(0.2) : null,
+//                 shape:
+//                     isSelected
+//                         ? RoundedRectangleBorder(
+//                           side: BorderSide(color: Colors.blueAccent, width: 2),
+//                           borderRadius: BorderRadius.circular(12),
+//                         )
+//                         : RoundedRectangleBorder(
+//                           borderRadius: BorderRadius.circular(12),
+//                         ),
+//                 child: ListTile(
+//                   title: Text(record is Income ? record.source : record.name),
+//                   // subtitle: Text('₹ ${record.amount} | ${record.date}'),
+//                   subtitle: RichText(
+//                     text: TextSpan(
+//                       style: TextStyle(
+//                         color: Colors.grey[600],
+//                         fontSize: 14,
+//                       ), // Default style
+//                       children: [
+//                         TextSpan(
+//                           text:
+//                               (record is Borrow || record is Lending)
+//                                   ? '₹ ${record.amount} | '
+//                                   : (record is Expense)
+//                                   ? '₹ ${record.amount} | ${record.date} | ${record.type}'
+//                                   : '₹ ${record.amount} | ${record.date}',
+//                         ),
+//                         if (record is Borrow || record is Lending) ...[
+//                           if (record.status == "Pending")
+//                             TextSpan(
+//                               text: record.status,
+//                               style: TextStyle(
+//                                 color: Colors.red[200],
+//                               ), // Red status
+//                             ),
+//                           if (record.status != 'Pending')
+//                             TextSpan(
+//                               text: 'Cleared: ${record.clearedDate}',
+//                               style: TextStyle(color: Colors.grey[600]),
+//                             ),
+//                         ],
+//                       ],
+//                     ),
+//                   ),
+//                   trailing:
+//                       isSelected
+//                           ? const Icon(
+//                             Icons.check_circle,
+//                             color: Colors.blueAccent,
+//                           )
+//                           : IconButton(
+//                             icon: const Icon(Icons.edit, size: 20),
+//                             onPressed: () => _editRecord(context, type, record),
+//                             padding: EdgeInsets.zero,
+//                             constraints: const BoxConstraints(),
+//                           ),
+//                 ),
+//               ),
+//             );
+//           },
+//         );
+//       },
+//     );
+//   }
 // }
 
 import 'package:flutter/material.dart';
@@ -754,6 +639,9 @@ import '../models/borrow.dart';
 import '../models/expense.dart';
 import '../models/income.dart';
 import '../models/lend.dart';
+import 'package:provider/provider.dart';
+import '../helpers/transaction_provider.dart';
+import '../widgets/transaction_dialog.dart';
 
 class CurrentMonthRecordsScreen extends StatefulWidget {
   const CurrentMonthRecordsScreen({Key? key}) : super(key: key);
@@ -767,14 +655,26 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _dbHelper = DatabaseHelper();
-  late String _currentMonthYear;
   final Set<int> _selectedRecords = {};
+  DateFormat formatter = DateFormat('dd-MM-yyyy');
+  final DateFormat _formatter = DateFormat('dd-MM-yyyy');
+  late final String _currentMonthYear;
+
+  final _nameController = TextEditingController();
+  final _amountController = TextEditingController();
+  final _statusController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
+  List<String> _expenseTypes = ["Food", "Transport", "Shopping", "Rent"];
+  String? _selectedType;
+
+  List<String> _paymentMethodTypes = ["Cash", "UPI", "Card"];
+  String? _selectedPaymentType;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _currentMonthYear = DateFormat('yyyy-MM').format(DateTime.now());
+    _currentMonthYear = DateFormat('MM-yyyy').format(DateTime.now());
   }
 
   @override
@@ -783,103 +683,39 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
     super.dispose();
   }
 
-  Future<List<dynamic>> _fetchRecords(String type) {
-    //   final recordFetchers = {
-    //     'Income':
-    //         () => _dbHelper.getRecordsByMonthYear(
-    //           _currentMonthYear,
-    //           'incomes',
-    //           (map) => Income.fromMap(map),
-    //         ),
-    //     'Expense':
-    //         () => _dbHelper.getRecordsByMonthYear(
-    //           _currentMonthYear,
-    //           'expenses',
-    //           (map) => Expense.fromMap(map),
-    //         ),
-    //     'Borrow':
-    //         () => _dbHelper.getRecordsByMonthYear(
-    //           _currentMonthYear,
-    //           'borrows',
-    //           (map) => Borrow.fromMap(map),
-    //         ),
-    //     'Lending':
-    //         () => _dbHelper.getRecordsByMonthYear(
-    //           _currentMonthYear,
-    //           'lendings',
-    //           (map) => Lending.fromMap(map),
-    //         ),
-    //   };
-
-    //   return recordFetchers[type]!();
-    // }
-
-    final recordFetchers = {
+  Future<List<dynamic>> _fetchRecords(String type) async {
+    final fetchers = {
       'Income':
           () => _dbHelper.getRecordsByMonthYear(
             _currentMonthYear,
             'incomes',
-            (map) => Income(
-              id: map['id'],
-              source: map['source'],
-              amount: map['amount'],
-              date: map['date'],
-            ),
+            (map) => Income.fromMap(map),
           ),
       'Expense':
           () => _dbHelper.getRecordsByMonthYear(
             _currentMonthYear,
             'expenses',
-            (map) => Expense(
-              id: map['id'],
-              name: map['name'],
-              amount: map['amount'],
-              date: map['date'],
-              type: map['type'],
-            ),
+            (map) => Expense.fromMap(map),
           ),
       'Borrow':
           () => _dbHelper.getRecordsByMonthYear(
             _currentMonthYear,
             'borrows',
-            (map) => Borrow(
-              id: map['id'],
-              name: map['name'],
-              amount: map['amount'],
-              clearedDate: map['clearedDate'],
-              date: map['date'],
-              status: map['status'],
-            ),
+            (map) => Borrow.fromMap(map),
           ),
       'Lending':
           () => _dbHelper.getRecordsByMonthYear(
             _currentMonthYear,
             'lendings',
-            (map) => Lending(
-              id: map['id'],
-              name: map['name'],
-              amount: map['amount'],
-              date: map['date'],
-              clearedDate: map['clearedDate'],
-              status: map['status'],
-            ),
+            (map) => Lending.fromMap(map),
           ),
     };
-
-    return recordFetchers[type]!();
+    return fetchers[type]!();
   }
-
-  // void _deleteSelectedRecords() async {
-  //   for (var id in _selectedRecords) {
-  //     await _dbHelper.deleteRecordById(id);
-  //   }
-  //   setState(() => _selectedRecords.clear());
-  // }
 
   void _deleteSelectedRecords() async {
     for (var id in _selectedRecords) {
-      final currentIndex = _tabController.index;
-      switch (currentIndex) {
+      switch (_tabController.index) {
         case 0:
           await _dbHelper.deleteIncome(id);
           break;
@@ -894,9 +730,7 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
           break;
       }
     }
-    setState(() {
-      _selectedRecords.clear();
-    });
+    setState(() => _selectedRecords.clear());
   }
 
   void _toggleSelection(int id) {
@@ -908,20 +742,18 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
     );
   }
 
-  final _nameController = TextEditingController();
-  final _amountController = TextEditingController();
-  final _statusController = TextEditingController();
-
-  DateTime _selectedDate = DateTime.now();
-  String dateselected = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  String monthYear = DateFormat('yyyy-MM').format(DateTime.now());
-  DateFormat formatter = DateFormat('yyyy-MM-dd');
-
-  List<String> _expenseTypes = ["Food", "Transport", "Shopping", "Rent"];
-  String? _selectedType;
+  // void _pickDate() async {
+  //   DateTime? picked = await showDatePicker(
+  //     context: context,
+  //     initialDate: _selectedDate,
+  //     firstDate: DateTime(2000),
+  //     lastDate: DateTime(2101),
+  //   );
+  //   if (picked != null) setState(() => _selectedDate = picked);
+  // }
 
   void _editRecord(BuildContext context, String type, dynamic record) {
-    _showTransactionDialog(context, type, transaction: record);
+    _showEditDialog(context, type, record);
     setState(() {});
   }
 
@@ -941,6 +773,49 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
   }
 
   void _showAddExpenseDialog(BuildContext context) {
+    final TextEditingController _controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Add Expense Type"),
+          content: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              hintText: "Enter new expense type",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                String newType = _controller.text.trim();
+                if (newType.isEmpty || _expenseTypes.contains(newType)) {
+                  Navigator.of(context).pop(); // Close dialog without updates
+                  return;
+                }
+
+                setState(() {
+                  _expenseTypes.add(newType);
+                  _selectedType = newType; // Immediately select the new type
+                });
+
+                Navigator.of(context).pop(); // Close the dialog after adding
+              },
+              child: Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddExpenseDialog1(BuildContext context) {
     TextEditingController _expensetypecontroller = TextEditingController();
 
     showDialog(
@@ -976,6 +851,92 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
     );
   }
 
+  ValueNotifier<String> selectedStatus = ValueNotifier<String>('');
+  ValueNotifier<String> selectedStatusNew = ValueNotifier<String>('');
+
+  void _showEditDialog(BuildContext context, String type, dynamic transaction) {
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+
+    // Pre-fill fields with existing transaction data
+    provider.setEditingTransaction(transaction, type);
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => TransactionDialog(
+            type: type,
+            transaction: transaction, // Pass existing transaction for editing
+            onSubmit: (
+              String name,
+              double amount,
+              String date,
+              String status,
+              String paymentMethod, [
+              String? expenseType,
+            ]) async {
+              final dbHelper = DatabaseHelper();
+
+              switch (type) {
+                case 'Income':
+                  await dbHelper.updateIncome(
+                    Income(
+                      id: transaction.id,
+                      source: name,
+                      amount: amount,
+                      date: transaction.date,
+                      paymentMethod: paymentMethod,
+                    ),
+                  );
+                  break;
+                case 'Expense':
+                  await dbHelper.updateExpense(
+                    Expense(
+                      id: transaction.id,
+                      name: name,
+                      amount: amount,
+                      date: transaction.date,
+                      type: expenseType ?? transaction.type,
+                      paymentMethod: paymentMethod,
+                    ),
+                  );
+                  break;
+                case 'Lend':
+                  await dbHelper.updateLending(
+                    Lending(
+                      id: transaction.id,
+                      name: name,
+                      amount: amount,
+                      date: transaction.date,
+                      clearedDate: date,
+                      status: status,
+                      paymentMethod: paymentMethod,
+                    ),
+                  );
+                  break;
+                case 'Borrow':
+                  await dbHelper.updateBorrow(
+                    Borrow(
+                      id: transaction.id,
+                      name: name,
+                      amount: amount,
+                      date: transaction.date,
+                      clearedDate: date,
+                      status: status,
+                      paymentMethod: paymentMethod,
+                    ),
+                  );
+                  break;
+                default:
+                  print("Invalid transaction type: $type");
+              }
+
+              provider.clearInputs(); // Reset after editing
+              //Navigator.of(context).pop();
+            },
+          ),
+    );
+  }
+
   void _showTransactionDialog(
     BuildContext context,
     String type, {
@@ -991,6 +952,10 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
 
       _amountController.text = transaction.amount.toString();
       _selectedDate = DateTime.parse(transaction.date);
+      if (type == 'Lend' || type == 'Borrow' || type == 'Lending') {
+        selectedStatusNew = ValueNotifier(transaction.status);
+        print("SelectedstatusNew: ${selectedStatusNew.value}");
+      }
     }
 
     showDialog(
@@ -1029,10 +994,28 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
               ),
             ],
           ),
+          SegmentedButton<String>(
+            segments:
+                _paymentMethodTypes
+                    .map(
+                      (method) => ButtonSegment<String>(
+                        value: method,
+                        label: Text(method),
+                      ),
+                    )
+                    .toList(),
+            selected: {_selectedPaymentType ?? _paymentMethodTypes.first},
+            onSelectionChanged: (newSelection) {
+              setState(() {
+                _selectedPaymentType = newSelection.first;
+              });
+              print("Selected Payment Type: $_selectedPaymentType");
+            },
+          ),
         ];
 
         List<Widget> _getInputFields() {
-          if (type == 'Borrow' || type == 'Lend') {
+          if (type == 'Borrow' || type == 'Lending' || type == 'Lend') {
             return [
               ..._getCommonFields(),
               Column(
@@ -1040,42 +1023,187 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
                 children: [
                   const Text('Status', style: TextStyle(fontSize: 16)),
                   const SizedBox(height: 8),
+
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //   children: [
+                  //     ElevatedButton(
+                  //       onPressed: () {
+                  //         setState(() {
+                  //           _statusController.text = 'Pending';
+                  //         });
+                  //       },
+                  //       style: ButtonStyle(
+                  //         backgroundColor:
+                  //             MaterialStateProperty.resolveWith<Color>((
+                  //               Set<MaterialState> states,
+                  //             ) {
+                  //               if (states.contains(MaterialState.pressed)) {
+                  //                 return Colors
+                  //                     .blue
+                  //                     .shade700; // Darker blue when pressed
+                  //               }
+                  //               return _statusController.text == 'Pending'
+                  //                   ? Colors.blue
+                  //                   : Colors.grey[300]!;
+                  //             }),
+                  //         foregroundColor: MaterialStateProperty.all(
+                  //           _statusController.text == 'Pending'
+                  //               ? Colors.white
+                  //               : Colors.black,
+                  //         ),
+                  //       ),
+                  //       child: const Text('Pending'),
+                  //     ),
+                  //     ElevatedButton(
+                  //       onPressed: () {
+                  //         setState(() {
+                  //           _statusController.text = 'Paid';
+                  //         });
+                  //       },
+                  //       style: ButtonStyle(
+                  //         backgroundColor:
+                  //             MaterialStateProperty.resolveWith<Color>((
+                  //               Set<MaterialState> states,
+                  //             ) {
+                  //               if (states.contains(MaterialState.pressed)) {
+                  //                 return Colors
+                  //                     .blue
+                  //                     .shade700; // Darker blue when pressed
+                  //               }
+                  //               return _statusController.text == 'Paid'
+                  //                   ? Colors.blue
+                  //                   : Colors.grey[300]!;
+                  //             }),
+                  //         foregroundColor: MaterialStateProperty.all(
+                  //           _statusController.text == 'Paid'
+                  //               ? Colors.white
+                  //               : Colors.black,
+                  //         ),
+                  //       ),
+                  //       child: const Text('Paid'),
+                  //     ),
+                  //   ],
+                  // ),
+
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  //   children: [
+                  //     ValueListenableBuilder<String>(
+                  //       valueListenable: selectedStatus,
+                  //       builder: (context, value, child) {
+                  //         return ElevatedButton(
+                  //           onPressed: () {
+                  //             setState(() {
+                  //               selectedStatus.value = 'Pending';
+                  //               _statusController.text = 'Pending';
+                  //               selectedStatusNew.value = 'Pedning';
+                  //               ();
+                  //             });
+                  //             print("Status: ${_statusController}");
+                  //           },
+                  //           style: ElevatedButton.styleFrom(
+                  //             backgroundColor:
+                  //                 (value == 'Pending' ||
+                  //                         selectedStatusNew.value != 'Paid')
+                  //                     ? Colors.purpleAccent
+                  //                     : Colors.grey[300],
+                  //             foregroundColor:
+                  //                 (value == 'Pending' ||
+                  //                         selectedStatusNew.value != 'Paid')
+                  //                     ? Colors.white
+                  //                     : Colors.black,
+                  //           ),
+                  //           child: const Text('Pending'),
+                  //         );
+                  //       },
+                  //     ),
+                  //     ValueListenableBuilder<String>(
+                  //       valueListenable: selectedStatus,
+                  //       builder: (context, value, child) {
+                  //         return ElevatedButton(
+                  //           onPressed: () {
+                  //             setState(() {
+                  //               selectedStatus.value = 'Paid';
+                  //               _statusController.text = 'Paid';
+                  //               selectedStatusNew.value = 'Paid';
+                  //               ();
+                  //             });
+
+                  //           },
+                  //           style: ElevatedButton.styleFrom(
+                  //             backgroundColor:
+                  //                 (value == 'Paid' ||
+                  //                         selectedStatusNew.value != 'Pending')
+                  //                     ? Colors.purpleAccent
+                  //                     : Colors.grey[300],
+                  //             foregroundColor:
+                  //                 (value == 'Paid' ||
+                  //                         selectedStatusNew.value != 'Pending')
+                  //                     ? Colors.white
+                  //                     : Colors.black,
+                  //           ),
+                  //           child: const Text('Paid'),
+                  //         );
+                  //       },
+                  //     ),
+                  //   ],
+                  // ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          _statusController.text = 'Pending';
+                      ValueListenableBuilder<String>(
+                        valueListenable: selectedStatus,
+                        builder: (context, value, child) {
+                          return ElevatedButton(
+                            onPressed: () {
+                              selectedStatus.value = 'Pending';
+                              _statusController.text = 'Pending';
+                              selectedStatusNew.value =
+                                  'Pending'; // ✅ Fixed typo
+                              selectedStatusNew
+                                  .notifyListeners(); // ✅ Ensure update
+                              print("Status: ${_statusController.text}");
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  (selectedStatusNew.value == 'Pending')
+                                      ? Colors.purpleAccent
+                                      : Colors.grey[300],
+                              foregroundColor:
+                                  (selectedStatusNew.value == 'Pending')
+                                      ? Colors.white
+                                      : Colors.black,
+                            ),
+                            child: const Text('Pending'),
+                          );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _statusController.text == 'Pending'
-                                  ? Colors
-                                      .blue // Highlight if selected
-                                  : Colors.grey[300],
-                          foregroundColor:
-                              _statusController.text == 'Pending'
-                                  ? Colors.white
-                                  : Colors.black,
-                        ),
-                        child: const Text('Pending'),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _statusController.text = 'Paid';
+                      ValueListenableBuilder<String>(
+                        valueListenable: selectedStatus,
+                        builder: (context, value, child) {
+                          return ElevatedButton(
+                            onPressed: () {
+                              selectedStatus.value = 'Paid';
+                              _statusController.text = 'Paid';
+                              selectedStatusNew.value = 'Paid';
+                              selectedStatusNew
+                                  .notifyListeners(); // ✅ Ensure update
+                              print("Status: ${_statusController.text}");
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  (selectedStatusNew.value == 'Paid')
+                                      ? Colors.purpleAccent
+                                      : Colors.grey[300],
+                              foregroundColor:
+                                  (selectedStatusNew.value == 'Paid')
+                                      ? Colors.white
+                                      : Colors.black,
+                            ),
+                            child: const Text('Paid'),
+                          );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _statusController.text == 'Paid'
-                                  ? Colors
-                                      .blue // Highlight if selected
-                                  : Colors.grey[300],
-                          foregroundColor:
-                              _statusController.text == 'Paid'
-                                  ? Colors.white
-                                  : Colors.black,
-                        ),
-                        child: const Text('Paid'),
                       ),
                     ],
                   ),
@@ -1086,46 +1214,174 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
           if (type == "Expense") {
             return [
               ..._getCommonFields(),
-              Center(
-                child: Wrap(
-                  spacing: 10.0,
-                  children: [
-                    ..._expenseTypes.map((type) {
-                      return ChoiceChip(
-                        label: Text(type),
-                        selected: _selectedType == type,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedType = type; // Always selects a type
-                          });
-                        },
+              DropdownButtonFormField<String>(
+                value: _selectedType,
+                decoration: InputDecoration(
+                  labelText: "Expense Type",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                ),
+                items:
+                    _expenseTypes.map((expenseType) {
+                      return DropdownMenuItem<String>(
+                        value: expenseType,
+                        child: Text(expenseType),
                       );
                     }).toList(),
-                    ActionChip(
-                      label: Text("➕ Add"),
-                      onPressed: () => _showAddExpenseDialog(context),
+                onChanged: (newValue) {
+                  setState(() {
+                    _selectedType = newValue;
+                  });
+                },
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: () => _showAddExpenseDialog(context),
+                  icon: Icon(Icons.add, size: 18, color: Colors.green.shade700),
+                  label: Text(
+                    "Add Type",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green.shade700,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ];
           }
+
+          /// Function to show a bottom sheet for adding expenses
+          // void _showAddExpenseBottomSheet(BuildContext context) {
+          //   showModalBottomSheet(
+          //     context: context,
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          //     ),
+          //     builder: (context) {
+          //       return Padding(
+          //         padding: const EdgeInsets.all(16.0),
+          //         child: Column(
+          //           mainAxisSize: MainAxisSize.min,
+          //           crossAxisAlignment: CrossAxisAlignment.start,
+          //           children: [
+          //             const Text(
+          //               "Add New Expense",
+          //               style: TextStyle(
+          //                 fontSize: 16,
+          //                 fontWeight: FontWeight.bold,
+          //               ),
+          //             ),
+          //             const SizedBox(height: 10),
+          //             TextField(
+          //               decoration: InputDecoration(
+          //                 labelText: "Expense Name",
+          //                 border: OutlineInputBorder(),
+          //               ),
+          //             ),
+          //             const SizedBox(height: 10),
+          //             TextField(
+          //               decoration: InputDecoration(
+          //                 labelText: "Amount",
+          //                 border: OutlineInputBorder(),
+          //               ),
+          //               keyboardType: TextInputType.number,
+          //             ),
+          //             const SizedBox(height: 20),
+          //             ElevatedButton(
+          //               onPressed: () {
+          //                 // Handle adding the expense
+          //                 Navigator.pop(context);
+          //               },
+          //               child: const Text("Add Expense"),
+          //             ),
+          //           ],
+          //         ),
+          //       );
+          //     },
+          //   );
+          // }
+
+          // if (type == "Expense") {
+          //   return [
+          //     ..._getCommonFields(),
+          //     SizedBox(
+          //       height: 40, // Compact height
+          //       child: SingleChildScrollView(
+          //         scrollDirection: Axis.horizontal,
+          //         child: Row(
+          //           children: [
+          //             ..._expenseTypes.map(
+          //               (type) => Padding(
+          //                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          //                 child: ChoiceChip(
+          //                   label: Text(
+          //                     type,
+          //                     style: const TextStyle(fontSize: 12),
+          //                   ),
+          //                   padding: const EdgeInsets.symmetric(
+          //                     horizontal: 8,
+          //                     vertical: 2,
+          //                   ),
+          //                   visualDensity: VisualDensity.compact,
+          //                   selected: _selectedType == type,
+          //                   onSelected:
+          //                       (selected) => setState(() {
+          //                         _selectedType = type;
+          //                       }),
+          //                 ),
+          //               ),
+          //             ),
+          //             Padding(
+          //               padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          //               child: ActionChip(
+          //                 label: const Text(
+          //                   "➕ Add",
+          //                   style: TextStyle(fontSize: 12),
+          //                 ),
+          //                 padding: const EdgeInsets.symmetric(
+          //                   horizontal: 8,
+          //                   vertical: 2,
+          //                 ),
+          //                 visualDensity: VisualDensity.compact,
+          //                 onPressed: () => _showAddExpenseDialog(context),
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //     ),
+          //   ];
+          // }
+
           return _getCommonFields();
         }
 
         Future<void> _handleSubmit() async {
           final name = _nameController.text;
           final amount = double.parse(_amountController.text);
-          final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+          final formattedDate = DateFormat('dd-MM-yyyy').format(_selectedDate);
           final status = _statusController.text;
           final expenseType = _selectedType ?? '';
+          final paymentMethod = _selectedPaymentType ?? 'Cash';
 
           if (transaction == null) {
             // Add new transaction
             switch (type) {
               case 'Income':
                 await _dbHelper.insertIncome(
-                  Income(source: name, amount: amount, date: formattedDate),
+                  Income(
+                    source: name,
+                    amount: amount,
+                    date: formattedDate,
+                    paymentMethod: paymentMethod,
+                  ),
                 );
                 break;
               case 'Expense':
@@ -1135,10 +1391,11 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
                     amount: amount,
                     date: formattedDate,
                     type: expenseType,
+                    paymentMethod: paymentMethod,
                   ),
                 );
                 break;
-              case 'Lend':
+              case 'Lending':
                 await _dbHelper.insertLending(
                   Lending(
                     name: name,
@@ -1146,6 +1403,7 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
                     date: formattedDate,
                     clearedDate: formattedDate,
                     status: status,
+                    paymentMethod: paymentMethod,
                   ),
                 );
                 break;
@@ -1157,6 +1415,7 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
                     date: formattedDate,
                     clearedDate: formattedDate,
                     status: status,
+                    paymentMethod: paymentMethod,
                   ),
                 );
                 break;
@@ -1168,12 +1427,14 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
             // Update existing transaction
             switch (type) {
               case 'Income':
+                print('Income Date: ${transaction.date}');
                 await _dbHelper.updateIncome(
                   Income(
                     id: transaction.id,
                     source: name,
                     amount: amount,
-                    date: formattedDate,
+                    date: transaction.date,
+                    paymentMethod: paymentMethod,
                   ),
                 );
                 break;
@@ -1183,37 +1444,41 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
                     id: transaction.id,
                     name: name,
                     amount: amount,
-                    date: formattedDate,
+                    date: transaction.date,
                     type: expenseType,
+                    paymentMethod: paymentMethod,
                   ),
                 );
                 break;
-              case 'Lend':
+              case 'Lending':
                 await _dbHelper.updateLending(
                   Lending(
                     id: transaction.id,
                     name: name,
                     amount: amount,
-                    date: formattedDate,
+                    date: transaction.date,
                     clearedDate: formattedDate,
                     status: status,
+                    paymentMethod: paymentMethod,
                   ),
                 );
                 break;
               case 'Borrow':
+                print('Transaction id: ${transaction.id}');
                 await _dbHelper.updateBorrow(
                   Borrow(
                     id: transaction.id,
                     name: name,
                     amount: amount,
-                    date: formattedDate,
+                    date: transaction.date,
                     clearedDate: formattedDate,
                     status: status,
+                    paymentMethod: paymentMethod,
                   ),
                 );
                 break;
               default:
-                print('Invalid type');
+                print('Invalid type ${type}');
                 return;
             }
           }
@@ -1247,20 +1512,97 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
     );
   }
 
+  Widget _buildInfoTile(dynamic record, String type, bool isSelected) {
+    return Card(
+      color: isSelected ? Colors.blueAccent.withOpacity(0.2) : null,
+      shape: RoundedRectangleBorder(
+        side:
+            isSelected
+                ? BorderSide(color: Colors.blueAccent, width: 2)
+                : BorderSide.none,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        title: Text(record is Income ? record.source : record.name),
+        subtitle: RichText(
+          text: TextSpan(
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            children: [
+              TextSpan(
+                text:
+                    // '₹ ${record.amount} | ${DateFormat('dd-MM-yyyy').format(record.date)}',
+                    '₹ ${record.amount} | ${record.date} | ${record.paymentMethod}',
+              ),
+              if (record is Expense) TextSpan(text: ' | ${record.type}'),
+              if (record is Borrow || record is Lending) ...[
+                TextSpan(
+                  text:
+                      record.status == "Pending"
+                          ? ' | Pending'
+                          : ' | Cleared: ${record.clearedDate}',
+                  style: TextStyle(
+                    color:
+                        record.status == "Pending"
+                            ? Colors.red[200]
+                            : Colors.grey[600],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        // trailing:
+        //     isSelected
+        //         ? Icon(Icons.check_circle, color: Colors.blueAccent)
+        //         : IconButton(
+        //           icon: Icon(Icons.edit, size: 20),
+        //           onPressed: () => _editRecord(context, type, record),
+        //         ),
+        onLongPress: () => _toggleSelection(record.id),
+        onTap:
+            () =>
+                _selectedRecords.isNotEmpty
+                    ? _toggleSelection(record.id)
+                    : _editRecord(context, type, record),
+      ),
+    );
+  }
+
+  Widget _buildRecordList(String type) {
+    return FutureBuilder<List<dynamic>>(
+      future: _fetchRecords(type),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting)
+          return Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData || snapshot.data!.isEmpty)
+          return Center(child: Text('No $type records found.'));
+        return ListView.builder(
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            final record = snapshot.data![index];
+            return _buildInfoTile(
+              record,
+              type,
+              _selectedRecords.contains(record.id),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Records for ${DateFormat("MMMM yyyy").format(DateTime.now())}',
         ),
-
         actions:
             _selectedRecords.isNotEmpty
                 ? [
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: Icon(Icons.delete),
                     onPressed: _deleteSelectedRecords,
                   ),
                 ]
@@ -1285,98 +1627,6 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
               'Borrow',
             ].map((type) => _buildRecordList(type)).toList(),
       ),
-    );
-  }
-
-  Widget _buildRecordList(String type) {
-    return FutureBuilder<List<dynamic>>(
-      future: _fetchRecords(type),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(child: Text('No $type records found.'));
-        }
-
-        return ListView.builder(
-          itemCount: snapshot.data!.length,
-          itemBuilder: (context, index) {
-            final record = snapshot.data![index];
-            final isSelected = _selectedRecords.contains(record.id);
-
-            return GestureDetector(
-              onLongPress: () => _toggleSelection(record.id),
-              onTap:
-                  () =>
-                      _selectedRecords.isNotEmpty
-                          ? _toggleSelection(record.id)
-                          : null,
-              child: Card(
-                color: isSelected ? Colors.blueAccent.withOpacity(0.2) : null,
-                shape:
-                    isSelected
-                        ? RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.blueAccent, width: 2),
-                          borderRadius: BorderRadius.circular(12),
-                        )
-                        : RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                child: ListTile(
-                  title: Text(record is Income ? record.source : record.name),
-                  // subtitle: Text('₹ ${record.amount} | ${record.date}'),
-                  subtitle: RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                      ), // Default style
-                      children: [
-                        TextSpan(
-                          text:
-                              (record is Borrow || record is Lending)
-                                  ? '₹ ${record.amount} | '
-                                  : (record is Expense)
-                                  ? '₹ ${record.amount} | ${record.date} | ${record.type}'
-                                  : '₹ ${record.amount} | ${record.date}',
-                        ),
-                        if (record is Borrow || record is Lending) ...[
-                          if (record.status == "Pending")
-                            TextSpan(
-                              text: record.status,
-                              style: TextStyle(
-                                color: Colors.red[200],
-                              ), // Red status
-                            ),
-                          if (record.status != 'Pending')
-                            TextSpan(
-                              text: 'Cleared: ${record.clearedDate}',
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  trailing:
-                      isSelected
-                          ? const Icon(
-                            Icons.check_circle,
-                            color: Colors.blueAccent,
-                          )
-                          : IconButton(
-                            icon: const Icon(Icons.edit, size: 20),
-                            onPressed: () => _editRecord(context, type, record),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                ),
-              ),
-            );
-          },
-        );
-      },
     );
   }
 }

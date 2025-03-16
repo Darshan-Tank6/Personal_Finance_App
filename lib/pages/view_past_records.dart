@@ -25,6 +25,7 @@ class _ViewPastRecordsState extends State<ViewPastRecords> {
     _monthsYearsFuture = _dbHelper.getDistinctMonthsYears(
       'incomes',
     ); // Fetch distinct months-years
+    print("_monthsYearsFuture : ${_monthsYearsFuture}");
   }
 
   @override
@@ -43,28 +44,39 @@ class _ViewPastRecordsState extends State<ViewPastRecords> {
           }
 
           final monthsYears = snapshot.data!;
+          print("Month Years before: $monthsYears");
+
           return ListView.builder(
             itemCount: monthsYears.length,
             itemBuilder: (context, index) {
               final monthYear = monthsYears[index];
-              final formattedMonthYear = DateFormat(
-                "MMMM yyyy",
-              ).format(DateTime.parse("${monthYear}-01"));
-              return ListTile(
-                title: Text(formattedMonthYear),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => RecordsTabsScreen(
-                            monthYear: monthYear,
-                            dbHelper: _dbHelper,
-                          ),
-                    ),
-                  );
-                },
-              );
+
+              try {
+                // Parse MM-yyyy correctly
+                DateTime parsedDate = DateFormat("MM-yyyy").parse(monthYear);
+                String formattedMonthYear = DateFormat(
+                  "MMMM yyyy",
+                ).format(parsedDate);
+
+                return ListTile(
+                  title: Text(formattedMonthYear),
+                  onTap: () {
+                    print("monthYear: $monthYear");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => RecordsTabsScreen(
+                              monthYear: monthYear,
+                              dbHelper: _dbHelper,
+                            ),
+                      ),
+                    );
+                  },
+                );
+              } catch (e) {
+                return ListTile(title: Text("Invalid date format"));
+              }
             },
           );
         },
@@ -110,6 +122,7 @@ class _RecordsTabsScreenState extends State<RecordsTabsScreen>
               source: map['source'],
               amount: map['amount'],
               date: map['date'],
+              paymentMethod: map['paymentMethod'],
             ),
           ),
       'Expense':
@@ -122,6 +135,7 @@ class _RecordsTabsScreenState extends State<RecordsTabsScreen>
               amount: map['amount'],
               date: map['date'],
               type: map['type'],
+              paymentMethod: map['paymentMethod'],
             ),
           ),
       'Borrow':
@@ -135,6 +149,7 @@ class _RecordsTabsScreenState extends State<RecordsTabsScreen>
               clearedDate: map['clearedDate'],
               date: map['date'],
               status: map['status'],
+              paymentMethod: map['paymentMethod'],
             ),
           ),
       'Lending':
@@ -148,6 +163,7 @@ class _RecordsTabsScreenState extends State<RecordsTabsScreen>
               date: map['date'],
               clearedDate: map['clearedDate'],
               status: map['status'],
+              paymentMethod: map['paymentMethod'],
             ),
           ),
     };

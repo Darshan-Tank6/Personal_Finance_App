@@ -1,71 +1,3 @@
-// import 'package:flutter/material.dart';
-
-// void main() {
-//   runApp(const MyApp());
-// }
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   // This widget is the root of your application.
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'Flutter Demo',
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-//       ),
-//       home: const MyHomePage(title: 'Flutter Demo Home Page'),
-//     );
-//   }
-// }
-
-// class MyHomePage extends StatefulWidget {
-//   const MyHomePage({super.key, required this.title});
-
-//   final String title;
-
-//   @override
-//   State<MyHomePage> createState() => _MyHomePageState();
-// }
-
-// class _MyHomePageState extends State<MyHomePage> {
-//   int _counter = 0;
-
-//   void _incrementCounter() {
-//     setState(() {
-//       _counter++;
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-//         title: Text(widget.title),
-//       ),
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: <Widget>[
-//             const Text('You have pushed the button this many times:'),
-//             Text(
-//               '$_counter',
-//               style: Theme.of(context).textTheme.headlineMedium,
-//             ),
-//           ],
-//         ),
-//       ),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: _incrementCounter,
-//         tooltip: 'Increment',
-//         child: const Icon(Icons.add),
-//       ), // This trailing comma makes auto-formatting nicer for build methods.
-//     );
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'pages/home_page.dart';
@@ -81,11 +13,16 @@ import 'models/lend.dart';
 import 'pages/setting_page.dart';
 import 'pages/view_past_records.dart';
 import 'pages/theme_provider.dart';
+import 'helpers/transaction_provider.dart';
+import 'widgets/transaction_dialog.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => TransactionProvider()),
+      ],
       child: MyApp(),
     ),
   );
@@ -117,13 +54,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(home: HomeScreen());
-//   }
-// }
 
 class MainScreen extends StatefulWidget {
   @override
@@ -157,11 +87,21 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   DateTime _selectedDate = DateTime.now();
-  String dateselected = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String dateselected = DateFormat('dd-MM-yyyy').format(DateTime.now());
   String monthYear = DateFormat('yyyy-MM').format(DateTime.now());
-  DateFormat formatter = DateFormat('yyyy-MM-dd');
+  DateFormat formatter = DateFormat('dd-MM-yyyy');
 
   List<String> _expenseTypes = ["Food", "Transport", "Shopping", "Rent"];
+
+  final List<String> _paymentMethodTypes = ["Cash", "UPI", "Card"];
+  String _selectedPaymentType = "Cash";
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _selectedPaymentType = _paymentMethodTypes.first; // Default selection
+  // }
+
   String? _selectedType;
 
   void _pickDate() async {
@@ -176,7 +116,7 @@ class _MainScreenState extends State<MainScreen> {
         _selectedDate = picked;
       });
     }
-    print(_selectedDate);
+    print("Selected Date: ${_selectedDate}");
   }
 
   void _showAddExpenseDialog(BuildContext context) {
@@ -215,491 +155,293 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  ValueNotifier<String> selectedStatus = ValueNotifier<String>('');
+
   void _showDialog(BuildContext context, String type) {
+    final provider = Provider.of<TransactionProvider>(context, listen: false);
+    provider.clearInputs(); // Ensure fresh inputs
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        List<Widget> _getCommonFields() => [
-          TextField(
-            decoration: InputDecoration(
-              labelText: type == 'Income' ? 'Source' : 'Name',
-            ),
-            controller: _nameController,
-          ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Amount'),
-            keyboardType: TextInputType.number,
-            controller: _amountController,
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Date: ${formatter.format(_selectedDate)}",
-                style: TextStyle(fontSize: 14),
-              ),
-              Spacer(),
-              IconButton(
-                onPressed: _pickDate,
-                icon: Icon(
-                  Icons.date_range_rounded,
-                  color: Colors.purpleAccent[100],
-                ),
-                iconSize: 18,
-                tooltip: 'Pick a date',
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
-              ),
-            ],
-          ),
-        ];
+      builder:
+          (context) => TransactionDialog(
+            type: type,
+            onSubmit: (
+              String name,
+              double amount,
+              String date,
+              String? status,
+              String paymentMethod, [
+              String? expenseType,
+            ]) async {
+              final dbHelper = DatabaseHelper();
 
-        List<Widget> _getInputFields() {
-          if (type == 'Borrow' || type == 'Lend') {
-            return [
-              ..._getCommonFields(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Status', style: TextStyle(fontSize: 16)),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          _statusController.text = 'Pending';
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _statusController.text == 'Pending'
-                                  ? Colors
-                                      .blue // Highlight if selected
-                                  : Colors.grey[300],
-                          foregroundColor:
-                              _statusController.text == 'Pending'
-                                  ? Colors.white
-                                  : Colors.black,
-                        ),
-                        child: const Text('Pending'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _statusController.text = 'Paid';
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _statusController.text == 'Paid'
-                                  ? Colors
-                                      .blue // Highlight if selected
-                                  : Colors.grey[300],
-                          foregroundColor:
-                              _statusController.text == 'Paid'
-                                  ? Colors.white
-                                  : Colors.black,
-                        ),
-                        child: const Text('Paid'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ];
-          }
-          if (type == "Expense") {
-            return [
-              ..._getCommonFields(),
-              Center(
-                child: Wrap(
-                  spacing: 10.0,
-                  children: [
-                    ..._expenseTypes.map((type) {
-                      return ChoiceChip(
-                        label: Text(type),
-                        selected: _selectedType == type,
-                        onSelected: (selected) {
-                          setState(() {
-                            _selectedType = type; // Always selects a type
-                          });
-                        },
-                      );
-                    }).toList(),
-                    ActionChip(
-                      label: Text("➕ Add"),
-                      onPressed: () => _showAddExpenseDialog(context),
+              switch (type) {
+                case 'Income':
+                  await dbHelper.insertIncome(
+                    Income(
+                      source: name,
+                      amount: amount,
+                      date: date,
+                      paymentMethod: paymentMethod,
                     ),
-                  ],
-                ),
-              ),
-            ];
-          }
-          return _getCommonFields();
-        }
+                  );
+                  print("Successfully inserted date: ${date}");
+                  break;
+                case 'Expense':
+                  await dbHelper.insertExpense(
+                    Expense(
+                      name: name,
+                      amount: amount,
+                      date: date,
+                      type: expenseType ?? '',
+                      paymentMethod: paymentMethod,
+                    ),
+                  );
+                  print("Successfully inserted data: ");
+                  break;
+                case 'Lend':
+                  await dbHelper.insertLending(
+                    Lending(
+                      name: name,
+                      amount: amount,
+                      date: date,
+                      clearedDate: date,
+                      status: status ?? ' ',
+                      paymentMethod: paymentMethod,
+                    ),
+                  );
+                  print("Successfully inserted data: ");
+                  break;
+                case 'Borrow':
+                  await dbHelper.insertBorrow(
+                    Borrow(
+                      name: name,
+                      amount: amount,
+                      date: date,
+                      clearedDate: date,
+                      status: status ?? '',
+                      paymentMethod: paymentMethod,
+                    ),
+                  );
+                  print("Successfully inserted data: ");
+                  break;
+                default:
+                  print("Invalid transaction type: $type");
+              }
 
-        Future<void> _handleSubmit() async {
-          final name = _nameController.text;
-          final amount = double.parse(_amountController.text);
-          final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-          final status = _statusController.text;
-          final expenseType = _selectedType ?? '';
-
-          switch (type) {
-            case 'Income':
-              await _dbHelper.insertIncome(
-                Income(source: name, amount: amount, date: formattedDate),
-              );
-              break;
-            case 'Expense':
-              await _dbHelper.insertExpense(
-                Expense(
-                  name: name,
-                  amount: amount,
-                  date: formattedDate,
-                  type: expenseType,
-                ),
-              );
-              break;
-            case 'Lend':
-              await _dbHelper.insertLending(
-                Lending(
-                  name: name,
-                  amount: amount,
-                  date: formattedDate,
-                  clearedDate: formattedDate,
-                  status: status,
-                ),
-              );
-              break;
-            case 'Borrow':
-              await _dbHelper.insertBorrow(
-                Borrow(
-                  name: name,
-                  amount: amount,
-                  date: formattedDate,
-                  clearedDate: formattedDate,
-                  status: status,
-                ),
-              );
-              break;
-            default:
-              print('Invalid type');
-              return;
-          }
-
-          setState(() {});
-          _nameController.clear();
-          _amountController.clear();
-          Navigator.of(context).pop();
-        }
-
-        return AlertDialog(
-          title: Text('Add $type'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: _getInputFields(),
-            ),
+              provider.clearInputs(); // Reset after adding
+              //Navigator.of(context).pop();
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-            TextButton(onPressed: _handleSubmit, child: Text('Submit')),
-          ],
-        );
-      },
     );
   }
 
-  void _showTransactionDialog(
-    BuildContext context,
-    String type, {
-    dynamic transaction,
-  }) {
-    if (transaction != null) {
-      _nameController.text = transaction.name ?? transaction.source ?? '';
-      _amountController.text = transaction.amount.toString();
-      _selectedDate = DateTime.parse(transaction.date);
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        List<Widget> _getCommonFields() => [
-          TextField(
-            decoration: InputDecoration(
-              labelText: type == 'Income' ? 'Source' : 'Name',
-            ),
-            controller: _nameController,
-          ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Amount'),
-            keyboardType: TextInputType.number,
-            controller: _amountController,
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Date: ${formatter.format(_selectedDate)}",
-                style: TextStyle(fontSize: 14),
-              ),
-              Spacer(),
-              IconButton(
-                onPressed: _pickDate,
-                icon: Icon(
-                  Icons.date_range_rounded,
-                  color: Colors.purpleAccent[100],
-                ),
-                iconSize: 18,
-                tooltip: 'Pick a date',
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
-              ),
-            ],
-          ),
-        ];
-
-        List<Widget> _getInputFields() {
-          if (type == 'Borrow') {
-            return [
-              ..._getCommonFields(),
-              DropdownButtonFormField(
-                decoration: InputDecoration(labelText: 'Status'),
-                value: transaction?.status ?? 'Pending',
-                items:
-                    ['Pending', 'Paid']
-                        .map(
-                          (status) => DropdownMenuItem(
-                            value: status,
-                            child: Text(status),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (value) {},
-              ),
-            ];
-          }
-          return _getCommonFields();
-        }
-
-        Future<void> _handleSubmit() async {
-          final name = _nameController.text;
-          final amount = double.parse(_amountController.text);
-          final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-          final status = _statusController.text;
-          final expenseType = _selectedType!;
-
-          if (transaction == null) {
-            // Add new transaction
-            switch (type) {
-              case 'Income':
-                await _dbHelper.insertIncome(
-                  Income(source: name, amount: amount, date: formattedDate),
-                );
-                break;
-              case 'Expense':
-                await _dbHelper.insertExpense(
-                  Expense(
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    type: expenseType,
-                  ),
-                );
-                break;
-              case 'Lend':
-                await _dbHelper.insertLending(
-                  Lending(
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    clearedDate: formattedDate,
-                    status: status,
-                  ),
-                );
-                break;
-              case 'Borrow':
-                await _dbHelper.insertBorrow(
-                  Borrow(
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    clearedDate: formattedDate,
-                    status: status,
-                  ),
-                );
-                break;
-              default:
-                print('Invalid type');
-                return;
-            }
-          } else {
-            // Update existing transaction
-            switch (type) {
-              case 'Income':
-                await _dbHelper.updateIncome(
-                  Income(
-                    id: transaction.id,
-                    source: name,
-                    amount: amount,
-                    date: formattedDate,
-                  ),
-                );
-                break;
-              case 'Expense':
-                await _dbHelper.updateExpense(
-                  Expense(
-                    id: transaction.id,
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    type: expenseType,
-                  ),
-                );
-                break;
-              case 'Lend':
-                await _dbHelper.updateLending(
-                  Lending(
-                    id: transaction.id,
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    clearedDate: formattedDate,
-                    status: status,
-                  ),
-                );
-                break;
-              case 'Borrow':
-                await _dbHelper.updateBorrow(
-                  Borrow(
-                    id: transaction.id,
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    clearedDate: formattedDate,
-                    status: status,
-                  ),
-                );
-                break;
-              default:
-                print('Invalid type');
-                return;
-            }
-          }
-
-          setState(() {});
-          _nameController.clear();
-          _amountController.clear();
-          Navigator.of(context).pop();
-        }
-
-        return AlertDialog(
-          title: Text('${transaction == null ? 'Add' : 'Edit'} $type'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: _getInputFields(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: _handleSubmit,
-              child: Text(transaction == null ? 'Submit' : 'Update'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  //Add expense
-  void _addExpense() async {
-    if (_selectedType == null) {
-      // Show an error message if no type is selected
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Please select a type')));
-      return;
-    }
-
-    final name = _nameController.text;
-    final amount = double.parse(_amountController.text);
-
-    final type = _selectedType!; // Use the selected type for the expense
-    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    print(formattedDate);
-    final expense = Expense(
-      name: name,
-      amount: amount,
-      date: formattedDate,
-      type: type,
-    );
-
-    await _dbHelper.insertExpense(expense); // Insert expense into the database
-
-    // Update the actualBalance in the budget after recording the expense
-    //await _dbHelper.updateActualBalance(amount, type);
-
-    setState(() {}); // Refresh the page
-    _nameController.clear(); // Clear text fields
-    _amountController.clear();
-  }
-
-  //Add income
-  void _addIncome() async {
-    final source = _nameController.text;
-    final amount = double.parse(_amountController.text);
-    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    final income = Income(source: source, amount: amount, date: formattedDate);
-    await _dbHelper.insertIncome(income);
-    setState(() {});
-    _nameController.clear();
-    _amountController.clear();
-  }
-
-  //Add lendings
-  void _addLending() async {
-    final name = _nameController.text;
-    final amount = double.parse(_amountController.text);
-    final status = _statusController.text;
-    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    final lending = Lending(
-      name: name,
-      amount: amount,
-      date: formattedDate,
-      clearedDate: formattedDate,
-      status: status,
-    );
-    await _dbHelper.insertLending(lending);
-    setState(() {});
-    _nameController.clear();
-    _amountController.clear();
-  }
-
-  //Add borrows
-  void _addBorrow() async {
-    final name = _nameController.text;
-    final amount = double.parse(_amountController.text);
-    final status = _statusController.text;
-    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    final borrow = Borrow(
-      name: name,
-      amount: amount,
-      date: formattedDate,
-      clearedDate: formattedDate,
-      status: status,
-    );
-    await _dbHelper.insertBorrow(borrow);
-    setState(() {});
-    _nameController.clear();
-    _amountController.clear();
-  }
+  // void _showTransactionDialog(
+  //   BuildContext context,
+  //   String type, {
+  //   dynamic transaction,
+  // }) {
+  //   if (transaction != null) {
+  //     _nameController.text = transaction.name ?? transaction.source ?? '';
+  //     _amountController.text = transaction.amount.toString();
+  //     _selectedDate = DateTime.parse(transaction.date);
+  //   }
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       List<Widget> _getCommonFields() => [
+  //         TextField(
+  //           decoration: InputDecoration(
+  //             labelText: type == 'Income' ? 'Source' : 'Name',
+  //           ),
+  //           controller: _nameController,
+  //         ),
+  //         TextField(
+  //           decoration: InputDecoration(labelText: 'Amount'),
+  //           keyboardType: TextInputType.number,
+  //           controller: _amountController,
+  //         ),
+  //         Row(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Text(
+  //               "Date: ${formatter.format(_selectedDate)}",
+  //               style: TextStyle(fontSize: 14),
+  //             ),
+  //             Spacer(),
+  //             IconButton(
+  //               onPressed: _pickDate,
+  //               icon: Icon(
+  //                 Icons.date_range_rounded,
+  //                 color: Colors.purpleAccent[100],
+  //               ),
+  //               iconSize: 18,
+  //               tooltip: 'Pick a date',
+  //               padding: EdgeInsets.zero,
+  //               constraints: BoxConstraints(),
+  //             ),
+  //           ],
+  //         ),
+  //       ];
+  //
+  //       List<Widget> _getInputFields() {
+  //         if (type == 'Borrow') {
+  //           return [
+  //             ..._getCommonFields(),
+  //             DropdownButtonFormField(
+  //               decoration: InputDecoration(labelText: 'Status'),
+  //               value: transaction?.status ?? 'Pending',
+  //               items:
+  //                   ['Pending', 'Paid']
+  //                       .map(
+  //                         (status) => DropdownMenuItem(
+  //                           value: status,
+  //                           child: Text(status),
+  //                         ),
+  //                       )
+  //                       .toList(),
+  //               onChanged: (value) {},
+  //             ),
+  //           ];
+  //         }
+  //         return _getCommonFields();
+  //       }
+  //
+  //       Future<void> _handleSubmit() async {
+  //         final name = _nameController.text;
+  //         final amount = double.parse(_amountController.text);
+  //         final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+  //         final status = _statusController.text;
+  //         final expenseType = _selectedType!;
+  //
+  //         if (transaction == null) {
+  //           // Add new transaction
+  //           switch (type) {
+  //             case 'Income':
+  //               await _dbHelper.insertIncome(
+  //                 Income(source: name, amount: amount, date: formattedDate),
+  //               );
+  //               break;
+  //             case 'Expense':
+  //               await _dbHelper.insertExpense(
+  //                 Expense(
+  //                   name: name,
+  //                   amount: amount,
+  //                   date: formattedDate,
+  //                   type: expenseType,
+  //                 ),
+  //               );
+  //               break;
+  //             case 'Lend':
+  //               await _dbHelper.insertLending(
+  //                 Lending(
+  //                   name: name,
+  //                   amount: amount,
+  //                   date: formattedDate,
+  //                   clearedDate: formattedDate,
+  //                   status: status,
+  //                 ),
+  //               );
+  //               break;
+  //             case 'Borrow':
+  //               await _dbHelper.insertBorrow(
+  //                 Borrow(
+  //                   name: name,
+  //                   amount: amount,
+  //                   date: formattedDate,
+  //                   clearedDate: formattedDate,
+  //                   status: status,
+  //                 ),
+  //               );
+  //               break;
+  //             default:
+  //               print('Invalid type');
+  //               return;
+  //           }
+  //         } else {
+  //           // Update existing transaction
+  //           switch (type) {
+  //             case 'Income':
+  //               await _dbHelper.updateIncome(
+  //                 Income(
+  //                   id: transaction.id,
+  //                   source: name,
+  //                   amount: amount,
+  //                   date: formattedDate,
+  //                 ),
+  //               );
+  //               break;
+  //             case 'Expense':
+  //               await _dbHelper.updateExpense(
+  //                 Expense(
+  //                   id: transaction.id,
+  //                   name: name,
+  //                   amount: amount,
+  //                   date: formattedDate,
+  //                   type: expenseType,
+  //                 ),
+  //               );
+  //               break;
+  //             case 'Lend':
+  //               await _dbHelper.updateLending(
+  //                 Lending(
+  //                   id: transaction.id,
+  //                   name: name,
+  //                   amount: amount,
+  //                   date: formattedDate,
+  //                   clearedDate: formattedDate,
+  //                   status: status,
+  //                 ),
+  //               );
+  //               break;
+  //             case 'Borrow':
+  //               await _dbHelper.updateBorrow(
+  //                 Borrow(
+  //                   id: transaction.id,
+  //                   name: name,
+  //                   amount: amount,
+  //                   date: formattedDate,
+  //                   clearedDate: formattedDate,
+  //                   status: status,
+  //                 ),
+  //               );
+  //               break;
+  //             default:
+  //               print('Invalid type');
+  //               return;
+  //           }
+  //         }
+  //
+  //         setState(() {});
+  //         _nameController.clear();
+  //         _amountController.clear();
+  //         Navigator.of(context).pop();
+  //       }
+  //
+  //       return AlertDialog(
+  //         title: Text('${transaction == null ? 'Add' : 'Edit'} $type'),
+  //         content: SingleChildScrollView(
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: _getInputFields(),
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.of(context).pop(),
+  //             child: Text('Cancel'),
+  //           ),
+  //           TextButton(
+  //             onPressed: _handleSubmit,
+  //             child: Text(transaction == null ? 'Submit' : 'Update'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {

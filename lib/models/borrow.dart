@@ -6,6 +6,7 @@ class Borrow {
   String status;
   String date;
   String clearedDate;
+  String paymentMethod;
 
   Borrow({
     this.id,
@@ -14,6 +15,7 @@ class Borrow {
     required this.status,
     required this.date,
     required this.clearedDate,
+    required this.paymentMethod,
   });
 
   Map<String, dynamic> toMap() {
@@ -24,6 +26,19 @@ class Borrow {
       'status': status,
       'date': date,
       'clearedDate': clearedDate,
+      'paymentMethod': paymentMethod,
     };
+  }
+
+  factory Borrow.fromMap(Map<String, dynamic> map) {
+    return Borrow(
+      id: map['id'],
+      name: map['name'],
+      amount: map['amount'],
+      status: map['status'],
+      date: map['date'],
+      clearedDate: map['clearedDate'],
+      paymentMethod: map['paymentMethod'],
+    );
   }
 }
