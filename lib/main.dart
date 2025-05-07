@@ -10,11 +10,11 @@ import 'models/expense.dart';
 import 'models/borrow.dart';
 import 'models/income.dart';
 import 'models/lend.dart';
-import 'pages/setting_page.dart';
 import 'pages/view_past_records.dart';
-import 'pages/theme_provider.dart';
+import 'helpers/theme_provider.dart';
 import 'helpers/transaction_provider.dart';
 import 'widgets/transaction_dialog.dart';
+import 'package:flutter/services.dart'; // For haptic feedback
 
 void main() {
   runApp(
@@ -62,21 +62,18 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0; // Tracks the selected tab
-  final _dbHelper = DatabaseHelper();
+  // final _dbHelper = DatabaseHelper();
 
-  final _nameController = TextEditingController();
-  final _amountController = TextEditingController();
-  final _statusController = TextEditingController();
-  final _typeController = TextEditingController();
+  // final _nameController = TextEditingController();
+  // final _amountController = TextEditingController();
+  // final _statusController = TextEditingController();
+  // final _typeController = TextEditingController();
 
   // List of primary pages for the BottomNavigationBar
   final List<Widget> _pages = [
     CurrentMonthRecordsScreen(),
     HomePage(),
     SettingsPage(),
-    // IncomePage(),
-    // ExpensePage(),
-    // BudgetsPage(),
   ];
 
   // Function to handle BottomNavigationBar tap
@@ -86,15 +83,15 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  DateTime _selectedDate = DateTime.now();
+  // DateTime _selectedDate = DateTime.now();
   String dateselected = DateFormat('dd-MM-yyyy').format(DateTime.now());
   String monthYear = DateFormat('yyyy-MM').format(DateTime.now());
   DateFormat formatter = DateFormat('dd-MM-yyyy');
 
-  List<String> _expenseTypes = ["Food", "Transport", "Shopping", "Rent"];
+  // List<String> _expenseTypes = ["Food", "Transport", "Shopping", "Rent"];
 
-  final List<String> _paymentMethodTypes = ["Cash", "UPI", "Card"];
-  String _selectedPaymentType = "Cash";
+  // final List<String> _paymentMethodTypes = ["Cash", "UPI", "Card"];
+  // String _selectedPaymentType = "Cash";
 
   // @override
   // void initState() {
@@ -103,57 +100,6 @@ class _MainScreenState extends State<MainScreen> {
   // }
 
   String? _selectedType;
-
-  void _pickDate() async {
-    DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-    print("Selected Date: ${_selectedDate}");
-  }
-
-  void _showAddExpenseDialog(BuildContext context) {
-    TextEditingController _expensetypecontroller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Add Expense Type"),
-          content: TextField(
-            controller: _expensetypecontroller,
-            decoration: InputDecoration(hintText: "Enter new expense type"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  String newType = _expensetypecontroller.text.trim();
-                  if (newType.isNotEmpty && !_expenseTypes.contains(newType)) {
-                    _expenseTypes.add(newType);
-                    _selectedType = newType;
-                  }
-                });
-                Navigator.of(context).pop();
-              },
-              child: Text("Add"),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   ValueNotifier<String> selectedStatus = ValueNotifier<String>('');
 
@@ -173,6 +119,7 @@ class _MainScreenState extends State<MainScreen> {
               String? status,
               String paymentMethod, [
               String? expenseType,
+              String? repetetive,
             ]) async {
               final dbHelper = DatabaseHelper();
 
@@ -196,6 +143,7 @@ class _MainScreenState extends State<MainScreen> {
                       date: date,
                       type: expenseType ?? '',
                       paymentMethod: paymentMethod,
+                      repetetive: repetetive ?? 'false ',
                     ),
                   );
                   print("Successfully inserted data: ");
@@ -476,45 +424,63 @@ class _MainScreenState extends State<MainScreen> {
             ),
             label: 'Settings',
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(
-          //     Icons.account_balance,
-          //     //  color: Colors.purpleAccent,
-          //   ),
-          //   label: 'Budget',
-          // ),
         ],
       ),
       floatingActionButton: SpeedDial(
-        //animatedIcon: AnimatedIcons.ellipsis_search,
-        icon: Icons.add,
-        activeIcon: Icons.close,
-        backgroundColor: Colors.purpleAccent.withOpacity(0.8),
-        spacing: 5,
-        childPadding: const EdgeInsets.all(5),
-        spaceBetweenChildren: 4,
+        animatedIcon: AnimatedIcons.menu_close, // Better animated icon
+        backgroundColor: Colors.purpleAccent.withOpacity(0.9),
+        overlayColor: Colors.black.withOpacity(0.5), // Adds slight dimming
+        spacing: 8, // Increases space for better tap experience
+        spaceBetweenChildren: 8,
+        buttonSize: const Size(60, 60), // Slightly bigger FAB
+        childrenButtonSize: const Size(55, 55), // Adjust child button size
         children: [
           SpeedDialChild(
-            child: Icon(Icons.account_balance_wallet),
+            child: const Icon(
+              Icons.account_balance_wallet,
+              color: Colors.white,
+            ),
             label: 'Lendings',
-            onTap: () => _showDialog(context, 'Lend'),
+            labelBackgroundColor: Colors.blueAccent,
+            labelStyle: const TextStyle(fontSize: 16, color: Colors.white),
+            backgroundColor: Colors.blue,
+            onTap: () {
+              HapticFeedback.lightImpact(); // Small vibration
+              _showDialog(context, 'Lend');
+            },
           ),
           SpeedDialChild(
-            child: Icon(Icons.credit_card),
-            label: 'Borrows', //Credits page
-            onTap: () => _showDialog(context, 'Borrow'),
+            child: const Icon(Icons.credit_card, color: Colors.white),
+            label: 'Borrows',
+            labelBackgroundColor: Colors.orangeAccent,
+            labelStyle: const TextStyle(fontSize: 16, color: Colors.white),
+            backgroundColor: Colors.orange,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              _showDialog(context, 'Borrow');
+            },
           ),
-
           SpeedDialChild(
-            child: Icon(Icons.money_off),
+            child: const Icon(Icons.money_off, color: Colors.white),
             label: 'Expense',
-            onTap: () => _showDialog(context, 'Expense'),
+            labelBackgroundColor: Colors.redAccent,
+            labelStyle: const TextStyle(fontSize: 16, color: Colors.white),
+            backgroundColor: Colors.red,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              _showDialog(context, 'Expense');
+            },
           ),
-
           SpeedDialChild(
-            child: Icon(Icons.currency_rupee),
+            child: const Icon(Icons.currency_rupee, color: Colors.white),
             label: 'Income',
-            onTap: () => _showDialog(context, 'Income'),
+            labelBackgroundColor: Colors.greenAccent,
+            labelStyle: const TextStyle(fontSize: 16, color: Colors.white),
+            backgroundColor: Colors.green,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              _showDialog(context, 'Income');
+            },
           ),
         ],
       ),

@@ -772,84 +772,48 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
     print(_selectedDate);
   }
 
-  void _showAddExpenseDialog(BuildContext context) {
-    final TextEditingController _controller = TextEditingController();
+  // void _showAddExpenseDialog(BuildContext context) {
+  //   final TextEditingController _controller = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Add Expense Type"),
-          content: TextField(
-            controller: _controller,
-            decoration: InputDecoration(
-              hintText: "Enter new expense type",
-              border: OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                String newType = _controller.text.trim();
-                if (newType.isEmpty || _expenseTypes.contains(newType)) {
-                  Navigator.of(context).pop(); // Close dialog without updates
-                  return;
-                }
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         title: Text("Add Expense Type"),
+  //         content: TextField(
+  //           controller: _controller,
+  //           decoration: InputDecoration(
+  //             hintText: "Enter new expense type",
+  //             border: OutlineInputBorder(),
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () => Navigator.of(context).pop(),
+  //             child: Text("Cancel"),
+  //           ),
+  //           ElevatedButton(
+  //             onPressed: () {
+  //               String newType = _controller.text.trim();
+  //               if (newType.isEmpty || _expenseTypes.contains(newType)) {
+  //                 Navigator.of(context).pop(); // Close dialog without updates
+  //                 return;
+  //               }
 
-                setState(() {
-                  _expenseTypes.add(newType);
-                  _selectedType = newType; // Immediately select the new type
-                });
+  //               setState(() {
+  //                 _expenseTypes.add(newType);
+  //                 _selectedType = newType; // Immediately select the new type
+  //               });
 
-                Navigator.of(context).pop(); // Close the dialog after adding
-              },
-              child: Text("Add"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showAddExpenseDialog1(BuildContext context) {
-    TextEditingController _expensetypecontroller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Add Expense Type"),
-          content: TextField(
-            controller: _expensetypecontroller,
-            decoration: InputDecoration(hintText: "Enter new expense type"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  String newType = _expensetypecontroller.text.trim();
-                  if (newType.isNotEmpty && !_expenseTypes.contains(newType)) {
-                    _expenseTypes.add(newType);
-                    _selectedType = newType;
-                  }
-                });
-                Navigator.of(context).pop();
-              },
-              child: Text("Add"),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  //               Navigator.of(context).pop(); // Close the dialog after adding
+  //             },
+  //             child: Text("Add"),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   ValueNotifier<String> selectedStatus = ValueNotifier<String>('');
   ValueNotifier<String> selectedStatusNew = ValueNotifier<String>('');
@@ -873,6 +837,7 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
               String status,
               String paymentMethod, [
               String? expenseType,
+              String? repetetive,
             ]) async {
               final dbHelper = DatabaseHelper();
 
@@ -897,6 +862,7 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
                       date: transaction.date,
                       type: expenseType ?? transaction.type,
                       paymentMethod: paymentMethod,
+                      repetetive: repetetive ?? transaction.repetetive,
                     ),
                   );
                   break;
@@ -937,581 +903,6 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
     );
   }
 
-  void _showTransactionDialog(
-    BuildContext context,
-    String type, {
-    dynamic transaction,
-  }) {
-    if (transaction != null) {
-      if (type == 'Income') {
-        _nameController.text =
-            transaction.source ?? ''; // 'Income' uses 'source'
-      } else {
-        _nameController.text = transaction.name ?? ''; // Other types use 'name'
-      }
-
-      _amountController.text = transaction.amount.toString();
-      _selectedDate = DateTime.parse(transaction.date);
-      if (type == 'Lend' || type == 'Borrow' || type == 'Lending') {
-        selectedStatusNew = ValueNotifier(transaction.status);
-        print("SelectedstatusNew: ${selectedStatusNew.value}");
-      }
-    }
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        List<Widget> _getCommonFields() => [
-          TextField(
-            decoration: InputDecoration(
-              labelText: type == 'Income' ? 'Source' : 'Name',
-            ),
-            controller: _nameController,
-          ),
-          TextField(
-            decoration: InputDecoration(labelText: 'Amount'),
-            keyboardType: TextInputType.number,
-            controller: _amountController,
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Date: ${formatter.format(_selectedDate)}",
-                style: TextStyle(fontSize: 14),
-              ),
-              Spacer(),
-              IconButton(
-                onPressed: _pickDate,
-                icon: Icon(
-                  Icons.date_range_rounded,
-                  color: Colors.purpleAccent[100],
-                ),
-                iconSize: 18,
-                tooltip: 'Pick a date',
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
-              ),
-            ],
-          ),
-          SegmentedButton<String>(
-            segments:
-                _paymentMethodTypes
-                    .map(
-                      (method) => ButtonSegment<String>(
-                        value: method,
-                        label: Text(method),
-                      ),
-                    )
-                    .toList(),
-            selected: {_selectedPaymentType ?? _paymentMethodTypes.first},
-            onSelectionChanged: (newSelection) {
-              setState(() {
-                _selectedPaymentType = newSelection.first;
-              });
-              print("Selected Payment Type: $_selectedPaymentType");
-            },
-          ),
-        ];
-
-        List<Widget> _getInputFields() {
-          if (type == 'Borrow' || type == 'Lending' || type == 'Lend') {
-            return [
-              ..._getCommonFields(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Status', style: TextStyle(fontSize: 16)),
-                  const SizedBox(height: 8),
-
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //   children: [
-                  //     ElevatedButton(
-                  //       onPressed: () {
-                  //         setState(() {
-                  //           _statusController.text = 'Pending';
-                  //         });
-                  //       },
-                  //       style: ButtonStyle(
-                  //         backgroundColor:
-                  //             MaterialStateProperty.resolveWith<Color>((
-                  //               Set<MaterialState> states,
-                  //             ) {
-                  //               if (states.contains(MaterialState.pressed)) {
-                  //                 return Colors
-                  //                     .blue
-                  //                     .shade700; // Darker blue when pressed
-                  //               }
-                  //               return _statusController.text == 'Pending'
-                  //                   ? Colors.blue
-                  //                   : Colors.grey[300]!;
-                  //             }),
-                  //         foregroundColor: MaterialStateProperty.all(
-                  //           _statusController.text == 'Pending'
-                  //               ? Colors.white
-                  //               : Colors.black,
-                  //         ),
-                  //       ),
-                  //       child: const Text('Pending'),
-                  //     ),
-                  //     ElevatedButton(
-                  //       onPressed: () {
-                  //         setState(() {
-                  //           _statusController.text = 'Paid';
-                  //         });
-                  //       },
-                  //       style: ButtonStyle(
-                  //         backgroundColor:
-                  //             MaterialStateProperty.resolveWith<Color>((
-                  //               Set<MaterialState> states,
-                  //             ) {
-                  //               if (states.contains(MaterialState.pressed)) {
-                  //                 return Colors
-                  //                     .blue
-                  //                     .shade700; // Darker blue when pressed
-                  //               }
-                  //               return _statusController.text == 'Paid'
-                  //                   ? Colors.blue
-                  //                   : Colors.grey[300]!;
-                  //             }),
-                  //         foregroundColor: MaterialStateProperty.all(
-                  //           _statusController.text == 'Paid'
-                  //               ? Colors.white
-                  //               : Colors.black,
-                  //         ),
-                  //       ),
-                  //       child: const Text('Paid'),
-                  //     ),
-                  //   ],
-                  // ),
-
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  //   children: [
-                  //     ValueListenableBuilder<String>(
-                  //       valueListenable: selectedStatus,
-                  //       builder: (context, value, child) {
-                  //         return ElevatedButton(
-                  //           onPressed: () {
-                  //             setState(() {
-                  //               selectedStatus.value = 'Pending';
-                  //               _statusController.text = 'Pending';
-                  //               selectedStatusNew.value = 'Pedning';
-                  //               ();
-                  //             });
-                  //             print("Status: ${_statusController}");
-                  //           },
-                  //           style: ElevatedButton.styleFrom(
-                  //             backgroundColor:
-                  //                 (value == 'Pending' ||
-                  //                         selectedStatusNew.value != 'Paid')
-                  //                     ? Colors.purpleAccent
-                  //                     : Colors.grey[300],
-                  //             foregroundColor:
-                  //                 (value == 'Pending' ||
-                  //                         selectedStatusNew.value != 'Paid')
-                  //                     ? Colors.white
-                  //                     : Colors.black,
-                  //           ),
-                  //           child: const Text('Pending'),
-                  //         );
-                  //       },
-                  //     ),
-                  //     ValueListenableBuilder<String>(
-                  //       valueListenable: selectedStatus,
-                  //       builder: (context, value, child) {
-                  //         return ElevatedButton(
-                  //           onPressed: () {
-                  //             setState(() {
-                  //               selectedStatus.value = 'Paid';
-                  //               _statusController.text = 'Paid';
-                  //               selectedStatusNew.value = 'Paid';
-                  //               ();
-                  //             });
-
-                  //           },
-                  //           style: ElevatedButton.styleFrom(
-                  //             backgroundColor:
-                  //                 (value == 'Paid' ||
-                  //                         selectedStatusNew.value != 'Pending')
-                  //                     ? Colors.purpleAccent
-                  //                     : Colors.grey[300],
-                  //             foregroundColor:
-                  //                 (value == 'Paid' ||
-                  //                         selectedStatusNew.value != 'Pending')
-                  //                     ? Colors.white
-                  //                     : Colors.black,
-                  //           ),
-                  //           child: const Text('Paid'),
-                  //         );
-                  //       },
-                  //     ),
-                  //   ],
-                  // ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ValueListenableBuilder<String>(
-                        valueListenable: selectedStatus,
-                        builder: (context, value, child) {
-                          return ElevatedButton(
-                            onPressed: () {
-                              selectedStatus.value = 'Pending';
-                              _statusController.text = 'Pending';
-                              selectedStatusNew.value =
-                                  'Pending'; // ✅ Fixed typo
-                              selectedStatusNew
-                                  .notifyListeners(); // ✅ Ensure update
-                              print("Status: ${_statusController.text}");
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  (selectedStatusNew.value == 'Pending')
-                                      ? Colors.purpleAccent
-                                      : Colors.grey[300],
-                              foregroundColor:
-                                  (selectedStatusNew.value == 'Pending')
-                                      ? Colors.white
-                                      : Colors.black,
-                            ),
-                            child: const Text('Pending'),
-                          );
-                        },
-                      ),
-                      ValueListenableBuilder<String>(
-                        valueListenable: selectedStatus,
-                        builder: (context, value, child) {
-                          return ElevatedButton(
-                            onPressed: () {
-                              selectedStatus.value = 'Paid';
-                              _statusController.text = 'Paid';
-                              selectedStatusNew.value = 'Paid';
-                              selectedStatusNew
-                                  .notifyListeners(); // ✅ Ensure update
-                              print("Status: ${_statusController.text}");
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  (selectedStatusNew.value == 'Paid')
-                                      ? Colors.purpleAccent
-                                      : Colors.grey[300],
-                              foregroundColor:
-                                  (selectedStatusNew.value == 'Paid')
-                                      ? Colors.white
-                                      : Colors.black,
-                            ),
-                            child: const Text('Paid'),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ];
-          }
-          if (type == "Expense") {
-            return [
-              ..._getCommonFields(),
-              DropdownButtonFormField<String>(
-                value: _selectedType,
-                decoration: InputDecoration(
-                  labelText: "Expense Type",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                ),
-                items:
-                    _expenseTypes.map((expenseType) {
-                      return DropdownMenuItem<String>(
-                        value: expenseType,
-                        child: Text(expenseType),
-                      );
-                    }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedType = newValue;
-                  });
-                },
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: () => _showAddExpenseDialog(context),
-                  icon: Icon(Icons.add, size: 18, color: Colors.green.shade700),
-                  label: Text(
-                    "Add Type",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green.shade700,
-                    ),
-                  ),
-                ),
-              ),
-            ];
-          }
-
-          /// Function to show a bottom sheet for adding expenses
-          // void _showAddExpenseBottomSheet(BuildContext context) {
-          //   showModalBottomSheet(
-          //     context: context,
-          //     shape: RoundedRectangleBorder(
-          //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          //     ),
-          //     builder: (context) {
-          //       return Padding(
-          //         padding: const EdgeInsets.all(16.0),
-          //         child: Column(
-          //           mainAxisSize: MainAxisSize.min,
-          //           crossAxisAlignment: CrossAxisAlignment.start,
-          //           children: [
-          //             const Text(
-          //               "Add New Expense",
-          //               style: TextStyle(
-          //                 fontSize: 16,
-          //                 fontWeight: FontWeight.bold,
-          //               ),
-          //             ),
-          //             const SizedBox(height: 10),
-          //             TextField(
-          //               decoration: InputDecoration(
-          //                 labelText: "Expense Name",
-          //                 border: OutlineInputBorder(),
-          //               ),
-          //             ),
-          //             const SizedBox(height: 10),
-          //             TextField(
-          //               decoration: InputDecoration(
-          //                 labelText: "Amount",
-          //                 border: OutlineInputBorder(),
-          //               ),
-          //               keyboardType: TextInputType.number,
-          //             ),
-          //             const SizedBox(height: 20),
-          //             ElevatedButton(
-          //               onPressed: () {
-          //                 // Handle adding the expense
-          //                 Navigator.pop(context);
-          //               },
-          //               child: const Text("Add Expense"),
-          //             ),
-          //           ],
-          //         ),
-          //       );
-          //     },
-          //   );
-          // }
-
-          // if (type == "Expense") {
-          //   return [
-          //     ..._getCommonFields(),
-          //     SizedBox(
-          //       height: 40, // Compact height
-          //       child: SingleChildScrollView(
-          //         scrollDirection: Axis.horizontal,
-          //         child: Row(
-          //           children: [
-          //             ..._expenseTypes.map(
-          //               (type) => Padding(
-          //                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          //                 child: ChoiceChip(
-          //                   label: Text(
-          //                     type,
-          //                     style: const TextStyle(fontSize: 12),
-          //                   ),
-          //                   padding: const EdgeInsets.symmetric(
-          //                     horizontal: 8,
-          //                     vertical: 2,
-          //                   ),
-          //                   visualDensity: VisualDensity.compact,
-          //                   selected: _selectedType == type,
-          //                   onSelected:
-          //                       (selected) => setState(() {
-          //                         _selectedType = type;
-          //                       }),
-          //                 ),
-          //               ),
-          //             ),
-          //             Padding(
-          //               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          //               child: ActionChip(
-          //                 label: const Text(
-          //                   "➕ Add",
-          //                   style: TextStyle(fontSize: 12),
-          //                 ),
-          //                 padding: const EdgeInsets.symmetric(
-          //                   horizontal: 8,
-          //                   vertical: 2,
-          //                 ),
-          //                 visualDensity: VisualDensity.compact,
-          //                 onPressed: () => _showAddExpenseDialog(context),
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //       ),
-          //     ),
-          //   ];
-          // }
-
-          return _getCommonFields();
-        }
-
-        Future<void> _handleSubmit() async {
-          final name = _nameController.text;
-          final amount = double.parse(_amountController.text);
-          final formattedDate = DateFormat('dd-MM-yyyy').format(_selectedDate);
-          final status = _statusController.text;
-          final expenseType = _selectedType ?? '';
-          final paymentMethod = _selectedPaymentType ?? 'Cash';
-
-          if (transaction == null) {
-            // Add new transaction
-            switch (type) {
-              case 'Income':
-                await _dbHelper.insertIncome(
-                  Income(
-                    source: name,
-                    amount: amount,
-                    date: formattedDate,
-                    paymentMethod: paymentMethod,
-                  ),
-                );
-                break;
-              case 'Expense':
-                await _dbHelper.insertExpense(
-                  Expense(
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    type: expenseType,
-                    paymentMethod: paymentMethod,
-                  ),
-                );
-                break;
-              case 'Lending':
-                await _dbHelper.insertLending(
-                  Lending(
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    clearedDate: formattedDate,
-                    status: status,
-                    paymentMethod: paymentMethod,
-                  ),
-                );
-                break;
-              case 'Borrow':
-                await _dbHelper.insertBorrow(
-                  Borrow(
-                    name: name,
-                    amount: amount,
-                    date: formattedDate,
-                    clearedDate: formattedDate,
-                    status: status,
-                    paymentMethod: paymentMethod,
-                  ),
-                );
-                break;
-              default:
-                print('Invalid type');
-                return;
-            }
-          } else {
-            // Update existing transaction
-            switch (type) {
-              case 'Income':
-                print('Income Date: ${transaction.date}');
-                await _dbHelper.updateIncome(
-                  Income(
-                    id: transaction.id,
-                    source: name,
-                    amount: amount,
-                    date: transaction.date,
-                    paymentMethod: paymentMethod,
-                  ),
-                );
-                break;
-              case 'Expense':
-                await _dbHelper.updateExpense(
-                  Expense(
-                    id: transaction.id,
-                    name: name,
-                    amount: amount,
-                    date: transaction.date,
-                    type: expenseType,
-                    paymentMethod: paymentMethod,
-                  ),
-                );
-                break;
-              case 'Lending':
-                await _dbHelper.updateLending(
-                  Lending(
-                    id: transaction.id,
-                    name: name,
-                    amount: amount,
-                    date: transaction.date,
-                    clearedDate: formattedDate,
-                    status: status,
-                    paymentMethod: paymentMethod,
-                  ),
-                );
-                break;
-              case 'Borrow':
-                print('Transaction id: ${transaction.id}');
-                await _dbHelper.updateBorrow(
-                  Borrow(
-                    id: transaction.id,
-                    name: name,
-                    amount: amount,
-                    date: transaction.date,
-                    clearedDate: formattedDate,
-                    status: status,
-                    paymentMethod: paymentMethod,
-                  ),
-                );
-                break;
-              default:
-                print('Invalid type ${type}');
-                return;
-            }
-          }
-
-          setState(() {});
-          _nameController.clear();
-          _amountController.clear();
-          Navigator.of(context).pop();
-        }
-
-        return AlertDialog(
-          title: Text('${transaction == null ? 'Add' : 'Edit'} $type'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: _getInputFields(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: _handleSubmit,
-              child: Text(transaction == null ? 'Submit' : 'Update'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildInfoTile(dynamic record, String type, bool isSelected) {
     return Card(
       color: isSelected ? Colors.blueAccent.withOpacity(0.2) : null,
@@ -1533,7 +924,8 @@ class _CurrentMonthRecordsScreenState extends State<CurrentMonthRecordsScreen>
                     // '₹ ${record.amount} | ${DateFormat('dd-MM-yyyy').format(record.date)}',
                     '₹ ${record.amount} | ${record.date} | ${record.paymentMethod}',
               ),
-              if (record is Expense) TextSpan(text: ' | ${record.type}'),
+              if (record is Expense)
+                TextSpan(text: ' | ${record.type} | ${record.repetetive}'),
               if (record is Borrow || record is Lending) ...[
                 TextSpan(
                   text:

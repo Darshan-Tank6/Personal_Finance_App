@@ -48,6 +48,7 @@ class Expense {
   String date;
   String type;
   String paymentMethod;
+  String repetetive;
 
   Expense({
     this.id,
@@ -56,6 +57,7 @@ class Expense {
     required this.date,
     required this.type,
     required this.paymentMethod,
+    required this.repetetive,
   });
 
   Expense copyWith({
@@ -65,6 +67,7 @@ class Expense {
     String? date,
     String? type,
     String? paymentMethod,
+    String? repetetive,
   }) {
     return Expense(
       id: id ?? this.id,
@@ -73,6 +76,7 @@ class Expense {
       date: date ?? this.date,
       type: type ?? this.type,
       paymentMethod: paymentMethod ?? this.paymentMethod,
+      repetetive: repetetive ?? this.repetetive,
     );
   }
 
@@ -84,6 +88,7 @@ class Expense {
       'date': date,
       'type': type,
       'paymentMethod': paymentMethod,
+      'repetetive': repetetive,
     };
   }
 
@@ -95,6 +100,7 @@ class Expense {
       date: map['date'],
       type: map['type'],
       paymentMethod: map['paymentMethod'],
+      repetetive: map['repetetive'],
     );
   }
 }

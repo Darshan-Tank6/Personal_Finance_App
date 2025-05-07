@@ -261,7 +261,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:provider/provider.dart';
-import '../pages/theme_provider.dart';
+import '../helpers/theme_provider.dart';
 import '../helpers/transaction_provider.dart';
 import '../widgets/add_item_dialog.dart';
 
@@ -333,7 +333,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 return ListTile(
                   title: Text(expenseType),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete),
                     onPressed: () {
                       transactionProvider.removeExpenseType(expenseType);
                       setState(() {}); // ✅ Refresh UI after delete
@@ -374,7 +374,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 return ListTile(
                   title: Text(paymentMethod),
                   trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                    icon: const Icon(Icons.delete),
                     onPressed: () {
                       transactionProvider.removePaymentMethod(paymentMethod);
                       setState(() {}); // ✅ Refresh UI after delete
@@ -407,7 +407,7 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: const Text('Follow us on social media'),
             trailing: const Icon(Icons.open_in_new),
             onTap: () async {
-              const url = 'https://your-social-link-here.com';
+              const url = 'https://www.linkedin.com/in/darshan-tank-165827276';
               if (await canLaunchUrl(Uri.parse(url))) {
                 await launchUrl(Uri.parse(url));
               } else {

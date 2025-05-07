@@ -136,6 +136,7 @@ class _RecordsTabsScreenState extends State<RecordsTabsScreen>
               date: map['date'],
               type: map['type'],
               paymentMethod: map['paymentMethod'],
+              repetetive: map['repetetive'],
             ),
           ),
       'Borrow':

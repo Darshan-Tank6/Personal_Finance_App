@@ -21,7 +21,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDb() async {
-    String path = join(await getDatabasesPath(), 'expense_v1.7');
+    String path = join(await getDatabasesPath(), 'expense_v1.9');
     return await openDatabase(
       path,
       version: 3, // Incremented version number
@@ -42,6 +42,7 @@ class DatabaseHelper {
             amount REAL,
             date TEXT,
             type TEXT,
+            repetetive TEXT,
             paymentMethod TEXT
           )
         ''');
@@ -67,6 +68,13 @@ class DatabaseHelper {
             paymentMethod TEXT
           )
         ''');
+        //       await db.execute('''
+        // CREATE TABLE recurringexpenses(
+        // id INTEGER PRIMARY KEY AUTOINCREMENT,
+        // name TEXT,
+        // amount REAL,
+        // type TEXT,
+        // )''');
       },
     );
   }
@@ -108,6 +116,7 @@ class DatabaseHelper {
         date: maps[i]['date'],
         type: maps[i]['type'],
         paymentMethod: maps[i]['paymentMethod'],
+        repetetive: maps[i]['repetetive'],
       );
     });
   }

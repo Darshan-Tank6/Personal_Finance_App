@@ -68,6 +68,7 @@ class TransactionProvider extends ChangeNotifier {
   String selectedPaymentType = "Cash";
   String selectedStatus = "Pending";
   String selectedExpenseType = "";
+  String repetetive = "false";
 
   List<String> expenseTypes = ["Food", "Transport", "Shopping"];
   List<String> paymentMethods = ["Cash", "UPI", "Card"]; // ✅ Added this
@@ -100,6 +101,11 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setrepetetive(String newrepetetive) {
+    repetetive = newrepetetive;
+    notifyListeners();
+  }
+
   void setEditingTransaction(dynamic transaction, String type) {
     nameController.text =
         type == 'Income' ? transaction.source ?? '' : transaction.name ?? '';
@@ -114,6 +120,7 @@ class TransactionProvider extends ChangeNotifier {
     selectedPaymentType = transaction.paymentMethod ?? "Cash";
     if (type == 'Expense') {
       selectedExpenseType = transaction.type ?? "";
+      repetetive = transaction.repetetive ?? "false";
     }
     if (type == 'Lend' || type == 'Borrow') {
       selectedStatus = transaction.status ?? "Pending";
@@ -129,6 +136,7 @@ class TransactionProvider extends ChangeNotifier {
     selectedPaymentType = "Cash";
     selectedStatus = "Pending";
     selectedExpenseType = "";
+    repetetive = "False";
     notifyListeners();
   }
 
